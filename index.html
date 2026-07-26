@@ -97,6 +97,16 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   .scen-nav button:disabled{opacity:.4;}
   .scorepill{font-family:'Helvetica Neue',Arial,sans-serif; font-size:.85rem; color:var(--muted);}
   .empty{color:var(--muted); text-align:center; padding:30px 10px; font-style:italic;}
+  .idx{background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:14px 16px; margin-bottom:12px; box-shadow:var(--shadow);}
+  .idx h3{font-size:1rem; margin-bottom:6px;}
+  .idx h3 span{font-family:'Helvetica Neue',Arial,sans-serif; font-size:.68rem; color:var(--muted); font-weight:400; float:right; margin-top:4px;}
+  .idx-item{display:block; width:100%; text-align:left; font-size:.88rem; padding:7px 4px; border:none; border-bottom:1px solid #f0ece3; background:none; line-height:1.4;}
+  .idx-item:last-child{border-bottom:none;}
+  .idx-item.built{color:var(--accent); font-weight:bold; cursor:pointer; font-family:Georgia,serif;}
+  .idx-item.stub{color:var(--muted);}
+  .idx-item.stub b{color:var(--ink); font-weight:normal;}
+  .qlead{background:var(--accent-soft); border-radius:var(--r); padding:14px 16px; margin-bottom:12px; font-size:.92rem; color:#12403c; grid-column:1/-1;}
+  .qlead b{font-size:1.02rem;}
   @media (min-width:640px){ .grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;} .grid .tcard{margin-bottom:0;} }
 </style>
 </head>
@@ -111,11 +121,13 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   <button data-tab="cards">🃏 Flashcards</button>
   <button data-tab="compare">⚖️ Compare</button>
   <button data-tab="scenarios">🎯 Scenarios</button>
+  <button data-tab="index">🗂️ Index</button>
 </nav>
 <main>
   <!-- LIBRARY -->
   <div id="tab-library">
     <div class="toolbar"><input type="search" id="q" placeholder="Search theories, theorists, constructs…"></div>
+    <div class="chipbar" id="vtog"></div>
     <div class="chipbar" id="chips"></div>
     <div id="list" class="grid"></div>
     <div id="detail" class="hidden"></div>
@@ -153,6 +165,11 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   <!-- SCENARIOS -->
   <div id="tab-scenarios" class="hidden">
     <div id="scen-area"></div>
+  </div>
+
+  <!-- MASTER INDEX -->
+  <div id="tab-index" class="hidden">
+    <div id="index-area"></div>
   </div>
 </main>
 
@@ -1285,22 +1302,43 @@ const $=s=>document.querySelector(s);
 const byId=id=>THEORIES.find(t=>t.id===id);
 const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const DISCS=[...new Set(THEORIES.map(t=>t.discipline))];
-let activeDisc='All', currentTab='library';
+let activeDisc='All', currentTab='library', viewMode='subject', activeQ=0;
+
+/* Teacher-facing clusters: same theories, organized by the questions teachers actually ask. */
+const TEACH=[
+ {label:"🧠 Making it stick", q:"How do I make learning stick?", why:"The memory science every subject shares: retrieval beats rereading, spacing beats cramming, and overload kills learning.", ids:["desirable","infoprocessing","cogload","multimedia","schema","transfer","ericsson"]},
+ {label:"🔥 Motivation", q:"Why aren't they motivated — and what actually works?", why:"Choice, competence, and belonging beat points and prizes; how students explain failure matters as much as failure itself.", ids:["sdt","expectancyvalue","mindset","attribution","flow","socialcognitive","behaviorism","nudge"]},
+ {label:"🌍 Every learner", q:"How do I reach every learner?", why:"Design for variability from the start — culture and cognition are assets to build on, not obstacles to remove.", ids:["udl","crp","funds","vygotsky","gardner_mi","barkley","adhd_strategies","dualpathway_adhd"]},
+ {label:"🎯 Independence", q:"How do students become independent learners?", why:"Self-regulation is teachable: goals, strategies, self-monitoring, and if–then plans, not lectures about responsibility.", ids:["srl","implementation","socialcognitive","desirable","bloom","epistemology"]},
+ {label:"📖 Reading & writing", q:"How do I teach reading and writing in MY subject?", why:"Every discipline reads and writes differently — and writing is a way of learning content, not just reporting it.", ids:["svr","chall","schema","wtl","writing_sociocultural","flowerhayes","toulmin","digital_writing","nls"]},
+ {label:"🔢 Math & science sense", q:"How do I make math and science make sense?", why:"Concepts before procedures, misconceptions confronted not corrected, and guided — never unguided — discovery.", ids:["math_cra","skemp","math_rme","conceptualchange","inquiry","pbl","discovery","constructionism","cogload"]},
+ {label:"💬 Thinking & discussion", q:"How do I get real thinking, argument, and discussion?", why:"Argument has teachable structure, sources have authors, and stories are how humans organize understanding.", ids:["toulmin","fallacies","dualprocess","wineburg","bruner_narrative","rosenblatt","literary_crit","freire","eisner"]},
+ {label:"🏠 Beyond my classroom", q:"What shapes students beyond my classroom?", why:"Needs, identity, family knowledge, and labels students carry into the room — the forces teaching works within.", ids:["maslow","erikson","bourdieu","interactionism","dissonance","prospect","piaget"]},
+ {label:"🌱 Growing as teachers", q:"How do we grow and change as educators?", why:"Adults learn through experience, reflection, and community — the theory base for PD, PLCs, and coaching.", ids:["schon","kolb","mezirow","situated","agency","dewey","knowles","hcd","practitioner","dbr"]}
+];
 
 /* --- nav --- */
 document.querySelectorAll('#nav button').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('#nav button').forEach(x=>x.classList.remove('active'));
   b.classList.add('active');
-  ['library','cards','compare','scenarios'].forEach(t=>$('#tab-'+t).classList.toggle('hidden', t!==b.dataset.tab));
+  ['library','cards','compare','scenarios','index'].forEach(t=>$('#tab-'+t).classList.toggle('hidden', t!==b.dataset.tab));
   currentTab=b.dataset.tab;
   if(currentTab==='cards') buildDeck();
   if(currentTab==='compare') renderCompare();
+  if(currentTab==='index') renderIndex();
 }));
 
 /* --- library --- */
 function renderChips(){
-  $('#chips').innerHTML=['All','★ My Matrix',...DISCS].map(d=>`<button class="chip ${d===activeDisc?'active':''}" data-d="${esc(d)}">${esc(d)}</button>`).join('');
-  document.querySelectorAll('.chip').forEach(c=>c.addEventListener('click',()=>{activeDisc=c.dataset.d; renderChips(); renderList();}));
+  $('#vtog').innerHTML=[['subject','📚 By subject'],['question','🧑‍🏫 By teaching question']].map(([v,l])=>`<button class="chip ${viewMode===v?'active':''}" data-v="${v}">${l}</button>`).join('');
+  document.querySelectorAll('#vtog .chip').forEach(c=>c.addEventListener('click',()=>{viewMode=c.dataset.v; renderChips(); renderList();}));
+  if(viewMode==='subject'){
+    $('#chips').innerHTML=['All','★ My Matrix',...DISCS].map(d=>`<button class="chip ${d===activeDisc?'active':''}" data-d="${esc(d)}">${esc(d)}</button>`).join('');
+    document.querySelectorAll('#chips .chip').forEach(c=>c.addEventListener('click',()=>{activeDisc=c.dataset.d; renderChips(); renderList();}));
+  }else{
+    $('#chips').innerHTML=TEACH.map((t,i)=>`<button class="chip ${i===activeQ?'active':''}" data-i="${i}">${esc(t.label)}</button>`).join('');
+    document.querySelectorAll('#chips .chip').forEach(c=>c.addEventListener('click',()=>{activeQ=+c.dataset.i; renderChips(); renderList();}));
+  }
 }
 function matches(t,q){
   if(!q) return true; q=q.toLowerCase();
@@ -1308,23 +1346,30 @@ function matches(t,q){
   return hay.includes(q);
 }
 function renderList(){
-  $('#detail').classList.add('hidden'); $('#list').classList.remove('hidden'); $('.toolbar').classList.remove('hidden'); $('#chips').classList.remove('hidden');
+  $('#detail').classList.add('hidden'); $('#list').classList.remove('hidden'); $('.toolbar').classList.remove('hidden'); $('#chips').classList.remove('hidden'); $('#vtog').classList.remove('hidden');
   const q=$('#q').value.trim();
-  const items=THEORIES.filter(t=>(activeDisc==='All'||(activeDisc==='★ My Matrix'?t.dis:t.discipline===activeDisc))&&matches(t,q));
-  $('#list').innerHTML=items.length?items.map(t=>`
+  let items, lead='';
+  if(viewMode==='question'){
+    const cl=TEACH[activeQ];
+    items=cl.ids.map(id=>byId(id)).filter(Boolean).filter(t=>matches(t,q));
+    lead=`<div class="qlead"><b>${esc(cl.q)}</b><br>${esc(cl.why)}</div>`;
+  }else{
+    items=THEORIES.filter(t=>(activeDisc==='All'||(activeDisc==='★ My Matrix'?t.dis:t.discipline===activeDisc))&&matches(t,q));
+  }
+  $('#list').innerHTML=lead+(items.length?items.map(t=>`
     <div class="tcard" data-id="${t.id}">
       <div class="disc">${esc(t.discipline)}</div>
       <h3>${esc(t.name)}${t.dis?'<span class="badge" style="background:var(--accent-soft);color:#134441;">★ matrix</span>':''}${t.depth==='starter'?'<span class="badge">starter</span>':''}</h3>
       <div class="who">${esc(t.theorists)}</div>
       <p>${esc(t.tagline)}</p>
-    </div>`).join(''):'<div class="empty">No theories match that search.</div>';
+    </div>`).join(''):'<div class="empty">No theories match that search.</div>');
   document.querySelectorAll('.tcard').forEach(c=>c.addEventListener('click',()=>showDetail(c.dataset.id)));
 }
 function sec(title,inner){ return inner?`<section><h4>${title}</h4>${inner}</section>`:''; }
 function list(items){ return items&&items.length?'<ul>'+items.map(i=>`<li>${esc(i)}</li>`).join('')+'</ul>':''; }
 function showDetail(id){
   const t=byId(id); if(!t) return;
-  $('#list').classList.add('hidden'); $('.toolbar').classList.add('hidden'); $('#chips').classList.add('hidden');
+  $('#list').classList.add('hidden'); $('.toolbar').classList.add('hidden'); $('#chips').classList.add('hidden'); $('#vtog').classList.add('hidden');
   const d=$('#detail'); d.classList.remove('hidden');
   d.innerHTML=`<div class="detail">
     <button class="backbtn">← All theories</button>
@@ -1440,6 +1485,214 @@ function renderScenario(){
     $('#nextS').disabled=false;
   }));
   $('#nextS').addEventListener('click',()=>{sIdx++;renderScenario();});
+}
+
+/* --- master index --- */
+const STUBS = {
+"Learning Theory": [
+ ["Gestalt Theory (Wertheimer, Köhler, Koffka)","Learning as insight and perceptual reorganization — the whole is other than the sum of its parts."],
+ ["Gagné's Nine Events of Instruction","Conditions-of-learning framework prescribing instructional events matched to learning outcomes."],
+ ["ACT-R (Anderson)","Cognitive architecture modeling skill learning as declarative-to-procedural knowledge compilation."],
+ ["Levels of Processing (Craik & Lockhart)","Deeper semantic processing yields more durable memory than shallow processing."],
+ ["Generative Learning (Wittrock)","Learning improves when learners generate relationships — summaries, analogies, self-explanations."],
+ ["Self-Explanation Effect (Chi)","Explaining material to yourself while studying strongly boosts understanding."],
+ ["Productive Failure (Kapur)","Struggling with problems before instruction can outperform instruction-first sequences."],
+ ["Embodied Cognition","Thinking is grounded in bodily states and action — gesture and movement shape learning."],
+ ["Distributed Cognition (Hutchins)","Cognition spreads across people, tools, and representations — the cockpit remembers."],
+ ["Cultural-Historical Activity Theory (Engeström)","Analyzes learning through activity systems: subject, object, tools, rules, community, division of labor."],
+ ["4C/ID Model (van Merriënboer)","Whole-task instructional design for complex skills: tasks, supportive info, procedural info, part-task practice."],
+ ["Elaboration Theory (Reigeluth)","Sequence instruction simple-to-complex, zooming from overview to detail and back."]],
+"Education & Pedagogy": [
+ ["Montessori Method","Self-directed activity in prepared environments with didactic materials and mixed ages."],
+ ["Reggio Emilia Approach","Emergent, project-based early education — the environment as third teacher; hundred languages of children."],
+ ["Direct Instruction (Engelmann)","Scripted, carefully sequenced explicit teaching with strong effect-size evidence (Project Follow Through)."],
+ ["Differentiated Instruction (Tomlinson)","Adjusting content, process, and product to learner readiness, interest, and profile."],
+ ["Pedagogical Content Knowledge (Shulman)","The special amalgam of content and pedagogy that distinguishes teacher expertise."],
+ ["TPACK (Mishra & Koehler)","Technological pedagogical content knowledge — what teachers need to integrate technology well."],
+ ["Visible Learning (Hattie)","Meta-meta-analysis ranking influences on achievement; teacher clarity and feedback rank high."],
+ ["Ethics of Care (Noddings)","Education grounded in caring relations — modeling, dialogue, practice, confirmation."],
+ ["Constructive Alignment (Biggs)","Align intended outcomes, activities, and assessment; SOLO taxonomy of understanding."],
+ ["Competency-Based Education","Progress by demonstrated mastery rather than seat time."],
+ ["Flipped Learning","Direct instruction moves to individual space (video); class time becomes active application."],
+ ["Place-Based Education","Curriculum rooted in local community, ecology, and lived place."],
+ ["Curriculum Theory (Pinar, Schwab, Apple)","Currere, the practical, and official knowledge — the field that asks whose knowledge counts as curriculum."],
+ ["Trauma-Informed Education (Perry; SAMHSA)","Recognizing trauma's effects on learning and designing safety, trust, and regulation into schooling."]],
+"Literacy": [
+ ["Dual-Route Model of Reading","Word reading via lexical (whole-word) and sublexical (phonological) routes; explains dyslexia subtypes."],
+ ["Whole Language (Goodman)","Meaning-first reading philosophy; historically opposed to phonics emphasis — central to the reading wars."],
+ ["Matthew Effects in Reading (Stanovich)","Rich-get-richer dynamics: early reading success compounds; early failure cascades."],
+ ["Emergent Literacy (Clay, Teale & Sulzby)","Literacy develops from birth through print exposure, oral language, and early writing attempts."],
+ ["Four Resources Model (Luke & Freebody)","Readers as code breakers, meaning makers, text users, and text critics."],
+ ["Disciplinary Literacy (Shanahan & Shanahan)","Each discipline reads and writes differently; advanced literacy is subject-specific."],
+ ["Robust Vocabulary Instruction (Beck & McKeown)","Tiered vocabulary selection and rich, usage-based teaching."],
+ ["Critical Literacy","Reading texts to interrogate power, position, and whose interests are served."]],
+"Writing": [
+ ["Self-Regulated Strategy Development (Graham & Harris)","The most-validated writing intervention: explicit strategy instruction plus self-regulation."],
+ ["Process Movement (Murray, Graves, Calkins)","Writing workshop: choice, conferring, drafting, publishing — writing as process, not product."],
+ ["Simple View of Writing (Berninger)","Transcription and executive functions constrain text generation in working memory."],
+ ["Translanguaging (García)","Multilinguals deploy one integrated repertoire; pedagogy that leverages all their languages."],
+ ["Post-Process Theory","Critique of process orthodoxy: writing is public, interpretive, and situated beyond any single process."]],
+"Mathematics Ed": [
+ ["APOS Theory (Dubinsky)","Mathematical concepts develop through Action → Process → Object → Schema stages."],
+ ["Van Hiele Levels","Geometric thinking develops through qualitative levels from visualization to formal deduction."],
+ ["Cognitively Guided Instruction","Teachers build on children's intuitive problem-solving strategies, with strong evidence base."],
+ ["Commognition (Sfard)","Mathematical thinking as a form of communication; learning as changing discourse."],
+ ["Math Anxiety Research (Ashcraft, Beilock)","Anxiety consumes working memory and depresses performance; timed pressure worsens it."],
+ ["Five Strands of Mathematical Proficiency (NRC)","Understanding, fluency, strategic competence, reasoning, and productive disposition intertwined."]],
+"Science Ed": [
+ ["Knowledge in Pieces (diSessa)","Intuitive physics as fragmented p-prims, not coherent misconceptions — reframing conceptual change."],
+ ["Model-Based Learning","Science learning as constructing, testing, and revising models of phenomena."],
+ ["Nature of Science (Lederman)","Understanding science as tentative, empirical, theory-laden, and socially embedded."],
+ ["Socioscientific Issues (Zeidler)","Using contested science-society issues (climate, genetics) to develop reasoning and character."],
+ ["Argument-Driven Inquiry","Lab instruction restructured around claims, evidence, and peer critique."]],
+"Historical Thinking": [
+ ["Historical Consciousness (Rüsen)","How people orient in time by connecting past, present, and future through narrative."],
+ ["Collective Memory (Halbwachs)","Groups remember socially; memory frameworks shape what history feels true."],
+ ["Difficult Histories","Teaching violence, injustice, and trauma — pedagogy under emotional and political strain."],
+ ["Inquiry Design Model (C3 Framework)","Compelling questions, disciplinary tools, and informed action structuring social studies inquiry."]],
+"Psychology": [
+ ["Attachment Theory (Bowlby & Ainsworth)","Early caregiver bonds shape internal working models for relationships and exploration."],
+ ["Stereotype Threat (Steele & Aronson)","Fear of confirming a group stereotype depresses performance; situational cues matter."],
+ ["Interest Development (Hidi & Renninger)","Four phases from triggered situational to well-developed individual interest."],
+ ["Achievement Goal Theory (Ames, Elliot)","Mastery vs. performance, approach vs. avoidance goals shape engagement patterns."],
+ ["Control-Value Theory (Pekrun)","Achievement emotions arise from appraisals of control and value; they drive learning."],
+ ["Grit (Duckworth)","Passion and perseverance for long-term goals — influential and contested."],
+ ["Curiosity as Information Gap (Loewenstein)","Curiosity spikes when we notice a gap between what we know and want to know."],
+ ["Neo-Piagetian Theories (Case, Fischer)","Stage-like development reinterpreted through growing working-memory capacity and skills."],
+ ["Ecological Systems Theory (Bronfenbrenner)","Development unfolds within nested systems — micro, meso, exo, macro, chrono — a staple EdD framework."],
+ ["Belonging (Walton & Cohen; Strayhorn)","Sense of belonging drives persistence; brief belonging interventions show lasting effects."],
+ ["Social-Emotional Learning (CASEL)","Five competencies — self-awareness to responsible decision-making — and the evidence base behind SEL programs."]],
+"Sociology": [
+ ["Social Capital (Coleman, Putnam)","Networks, norms, and trust as resources for educational attainment."],
+ ["Hidden Curriculum","What schools teach implicitly — compliance, hierarchy, whose knowledge counts."],
+ ["Tracking & Detracking (Oakes)","Ability grouping's role in stratifying opportunity."],
+ ["Resistance Theory (Willis)","How working-class students' counter-school culture paradoxically reproduces class position."],
+ ["Intersectionality (Crenshaw)","Overlapping systems of advantage/disadvantage; single-axis analysis misses compounded experience."],
+ ["Community Cultural Wealth (Yosso)","Asset framework: aspirational, linguistic, familial, social, navigational, resistant capital."],
+ ["Credentialism (Collins)","Degrees as gatekeeping currency beyond the skills they certify."]],
+"Behavioral Economics": [
+ ["Scarcity Theory (Mullainathan & Shafir)","Scarcity captures attention and taxes cognitive bandwidth — poverty impairs decisions situationally."],
+ ["Present Bias & Hyperbolic Discounting","Overweighting immediate payoffs; why deadlines and commitment devices work."],
+ ["Commitment Devices","Voluntarily restricting future choices to follow through on intentions."],
+ ["Anchoring & Adjustment","First numbers bias subsequent judgments — including grading and evaluation."]],
+"Literary Theory": [
+ ["New Criticism","Meaning resides in the text's form and unity; biography and reader reaction are fallacies."],
+ ["Structuralism (Saussure, Barthes)","Meaning from underlying sign systems and codes."],
+ ["Deconstruction (Derrida)","Texts undermine their own oppositions; meaning endlessly defers."],
+ ["Dialogism (Bakhtin)","Language as many-voiced; every utterance answers and anticipates others."],
+ ["Narratology (Genette)","Systematic analysis of narrative time, voice, and focalization."],
+ ["Feminist & Gender Criticism","Reading for gendered construction, silences, and canon politics."],
+ ["Postcolonial Theory (Said, Spivak, Bhabha)","Orientalism, subalternity, hybridity — literature and empire."],
+ ["Ecocriticism","Literature's constructions of nature and environmental crisis."]],
+"Logic & Argumentation": [
+ ["Formal & Syllogistic Logic","Validity by form: from Aristotle's syllogisms to propositional and predicate calculus."],
+ ["Bayesian Reasoning","Updating beliefs by evidence; base-rate neglect as a core reasoning failure."],
+ ["Argumentation Schemes (Walton)","Presumptive patterns (expert opinion, analogy, consequence) with critical questions."],
+ ["Pragma-Dialectics (van Eemeren)","Argument as regulated critical discussion; fallacies as rule violations."],
+ ["Inference to the Best Explanation","Choosing hypotheses by explanatory power — the logic of much science and history."]],
+"Philosophy": [
+ ["Rationalism vs. Empiricism","Innate reason vs. experience as the source of knowledge — the classic epistemic axis."],
+ ["Phenomenology (Husserl, Merleau-Ponty)","Studying structures of lived experience; foundation for qualitative methods."],
+ ["Hermeneutics (Gadamer)","Understanding as interpretive fusion of horizons; all reading is situated."],
+ ["Critical Theory (Frankfurt School, Habermas)","Critique of domination; knowledge interests; communicative rationality."],
+ ["Postmodernism (Lyotard, Foucault)","Incredulity toward grand narratives; knowledge and power entwined."],
+ ["Existentialism in Education (Greene)","Freedom, imagination, and wide-awakeness as educational aims."],
+ ["Analytic Philosophy of Education (Peters, Hirst)","Conceptual analysis of education, teaching, and forms of knowledge."],
+ ["Bildung","German tradition of self-formation through culture — education as becoming."]],
+"Learning & ADHD": [
+ ["Cognitive-Energetic Model (Sergeant)","ADHD performance varies with arousal, activation, and effort pools — state, not just trait."],
+ ["Delay Aversion Refinements","Waiting itself is aversive; environmental immediacy reshapes behavior."],
+ ["Executive Function Training Debates (Diamond)","What actually improves EF — and why brain-training transfer is elusive."],
+ ["Mind-Wandering Research (Smallwood & Schooler)","Attention drifts by default; meta-awareness and interest modulate it."]],
+"Research & Methodology": [
+ ["Grounded Theory (Glaser & Strauss)","Building theory from data through constant comparison and theoretical sampling."],
+ ["Case Study Methodology (Yin, Stake)","Bounded, in-depth study of contemporary phenomena in context."],
+ ["Ethnography","Sustained fieldwork interpreting culture from within."],
+ ["Narrative Inquiry (Clandinin & Connelly)","Experience understood and researched as lived and told stories."],
+ ["Mixed Methods Design (Creswell, Teddlie)","Integrating quantitative and qualitative strands by design logic."],
+ ["Improvement Science (Bryk)","Networked, iterative PDSA cycles for educational improvement — cousin to DBR."],
+ ["Validity Frameworks (Messick, Kane)","Unified construct validity and argument-based validation."],
+ ["Phenomenological Methods (Moustakas, van Manen)","Researching the essence of lived experience."]],
+"Critical & Social Theory": [
+ ["Neoliberalism in Education (Ball, Apple, Giroux)","Markets, metrics, competition, and audit culture reshaping education's purposes — and educators' identities."],
+ ["Critical Race Theory in Education (Ladson-Billings & Tate)","Racism as endemic and structural; whiteness as property; interest convergence; counter-storytelling."],
+ ["Affect Theory (Ahmed, Massumi)","Emotion as circulating force that sticks to bodies, objects, and ideas — classrooms as affective economies."],
+ ["Pedagogy of Discomfort (Boler)","Productive emotional unsettling as a method in social justice education."],
+ ["Feminist Theory in Education (Lather, Weiler, hooks)","Gender, knowledge, and power in schooling; feminist pedagogy and methodology."],
+ ["Queer Theory (Butler; Kumashiro)","Gender performativity; troubling norms; anti-oppressive education."],
+ ["Disability Studies & DisCrit (Annamma, Connor, Ferri)","The social model of disability; how racism and ableism co-construct each other in schools."],
+ ["Decolonial Theory (Tuck & Yang; Smith)","Settler colonialism and education; 'decolonization is not a metaphor'; decolonizing methodologies."],
+ ["Foucault: Power/Knowledge & Governmentality","Discipline, surveillance, normalization — how schools produce governable subjects."],
+ ["Cultural Hegemony (Gramsci)","Domination through common sense and consent; education as counter-hegemonic possibility."],
+ ["Abolitionist Teaching (Love)","Refusing carceral logics in schooling; freedom dreaming and educational justice."]],
+"Leadership & Organizations": [
+ ["Transformational Leadership (Burns, Bass)","Idealized influence, inspirational motivation, intellectual stimulation, individualized consideration."],
+ ["Instructional Leadership (Hallinger & Murphy)","Leading through mission, managing instruction, and building climate — the principal-effects literature."],
+ ["Distributed Leadership (Spillane)","Leadership as practice stretched across leaders, followers, and situation — not a person but an activity."],
+ ["Adaptive Leadership (Heifetz)","Distinguishing technical problems from adaptive challenges that require learning and loss."],
+ ["Servant Leadership (Greenleaf)","Leader as servant first; growth of followers as the test."],
+ ["Culturally Responsive School Leadership (Khalifa)","Critical self-reflection, curricular reform, and community advocacy as leadership practice."],
+ ["Social Justice Leadership (Theoharis)","Principals advancing equity against resistance — and the toll it takes."],
+ ["Organizational Learning (Argyris & Schön)","Single- vs. double-loop learning; espoused theories vs. theories-in-use."],
+ ["Learning Organizations (Senge)","Five disciplines: personal mastery, mental models, shared vision, team learning, systems thinking."],
+ ["Sensemaking (Weick)","How people construct meaning in ambiguity — central to how teachers interpret reform."],
+ ["Change Theories (Lewin, Kotter, Fullan)","Unfreeze–change–refreeze; eight steps; coherence-making — the EdD change-leadership canon."],
+ ["Institutional Theory (Meyer & Rowan; DiMaggio & Powell)","Isomorphism, legitimacy, and loose coupling — why schools everywhere look alike."]],
+"Policy & Political Economy": [
+ ["Policy Implementation (McLaughlin, Honig)","Implementation as mutual adaptation and sensemaking, not compliance."],
+ ["Policy Enactment (Ball, Maguire, Braun)","Schools don't implement policy; they interpret and 'do' it with the resources and actors they have."],
+ ["Multiple Streams Framework (Kingdon)","Problems, policies, and politics converge in windows of opportunity."],
+ ["Advocacy Coalition Framework (Sabatier)","Policy change through competing belief-based coalitions over decades."],
+ ["Human Capital Theory (Becker, Schultz)","Education as economic investment — foundational and heavily critiqued."],
+ ["Street-Level Bureaucracy (Lipsky)","Frontline workers' discretion is the policy; teachers as street-level bureaucrats."],
+ ["Accountability & High-Stakes Testing (Koretz; Campbell's Law)","Measurement pressure distorts the measured; score inflation and narrowing."],
+ ["School Choice & Quasi-Markets (Chubb & Moe; critics)","Market mechanisms in schooling and their equity consequences."]],
+"Language & Multilingualism": [
+ ["Monitor Model & Input Hypothesis (Krashen)","Comprehensible input, acquisition vs. learning, and the affective filter."],
+ ["Interaction & Output Hypotheses (Long; Swain)","Negotiation of meaning and pushed output as engines of second language acquisition."],
+ ["Linguistic Interdependence & BICS/CALP (Cummins)","Conversational vs. academic language proficiency; transfer across languages."],
+ ["Translanguaging (García & Wei)","Multilinguals deploy one integrated repertoire; pedagogy that welcomes all of it."],
+ ["Raciolinguistics (Flores & Rosa)","How 'appropriateness' discourses racialize language; the listening subject."],
+ ["Sociolinguistics & Language Variation (Labov)","Dialect difference is not deficit — the linguistic legitimacy of all varieties."],
+ ["Usage-Based Acquisition (Tomasello)","Language learned from use via intention-reading and pattern-finding, not innate grammar."]],
+"Assessment & Evaluation": [
+ ["Formative Assessment (Black & Wiliam)","Inside the black box: five strategies that move learning while it's happening."],
+ ["Feedback Theory (Hattie & Timperley)","Feed up, feed back, feed forward — and why praise is the weakest level."],
+ ["Validity Argument (Messick; Kane)","Validity as an argument about interpretations and uses, not a property of tests."],
+ ["Classical Test Theory & IRT","Reliability, measurement error, and item response modeling — the psychometric backbone."],
+ ["Standards-Based Grading (Guskey; Marzano)","Reporting learning against standards; separating achievement from behavior."],
+ ["Program Evaluation Models (Stufflebeam CIPP; Kirkpatrick; Guskey)","Frameworks for judging programs and professional development — core EdD toolkit."],
+ ["Culturally Responsive Assessment","Whose knowledge, language, and ways of demonstrating learning count in measurement."],
+ ["Dynamic Assessment (Feuerstein; Vygotskian)","Assessing learning potential through mediated performance, not just unaided performance."]],
+"Technology & Digital Learning": [
+ ["Community of Inquiry (Garrison, Anderson & Archer)","Online learning through social, cognitive, and teaching presence."],
+ ["Transactional Distance (Moore)","Distance as a pedagogical variable of dialogue, structure, and learner autonomy."],
+ ["Games & Learning (Gee)","What good video games teach: identity, situated meaning, affinity spaces."],
+ ["Media Ecology (McLuhan, Postman)","Media environments reshape cognition and culture — the medium is the message."],
+ ["Technology Integration Models (SAMR, TPACK-linked)","From substitution to redefinition — with critiques of the ladder metaphor."],
+ ["Digital Divide & Digital Equity (Warschauer)","Access, use, and outcome gaps; technology amplifies existing pedagogy."],
+ ["AI in Education & Learning Analytics","Adaptive systems, generative AI, and the ethics and evidence of algorithmic education."]]
+};
+function renderIndex(){
+  const area=$('#index-area');
+  let builtT=0, allT=0, html='';
+  const CATS=[...DISCS, ...Object.keys(STUBS).filter(k=>!DISCS.includes(k))];
+  CATS.forEach(d=>{
+    const built=THEORIES.filter(t=>t.discipline===d);
+    const stubs=STUBS[d]||[];
+    builtT+=built.length; allT+=built.length+stubs.length;
+    html+=`<div class="idx"><h3>${esc(d)}<span>${built.length} of ${built.length+stubs.length} built</span></h3>`;
+    html+=built.map(t=>`<button class="idx-item built" data-id="${t.id}">✓ ${esc(t.name)}${t.dis?' ★':''}</button>`).join('');
+    html+=stubs.map(s=>`<div class="idx-item stub"><b>${esc(s[0])}</b> — ${esc(s[1])}</div>`).join('');
+    html+='</div>';
+  });
+  area.innerHTML=`<p class="note" style="text-align:left;margin:0 0 10px;">The full map of the Lab: <b>${builtT} theories built</b> (tap ✓ to open; ★ = in your Research Matrix) and <b>${allT-builtT} more on the horizon</b> — a curated landscape, since no finished list of all theories exists anywhere. Want one built out? Ask Claude and re-upload the app.</p>`+html;
+  area.querySelectorAll('.idx-item.built').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('active', x.dataset.tab==='library'));
+    ['library','cards','compare','scenarios','index'].forEach(t=>$('#tab-'+t).classList.toggle('hidden', t!=='library'));
+    currentTab='library';
+    showDetail(b.dataset.id);
+  }));
 }
 
 /* --- init --- */
