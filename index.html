@@ -107,6 +107,10 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   .idx-item.stub b{color:var(--ink); font-weight:normal;}
   .qlead{background:var(--accent-soft); border-radius:var(--r); padding:14px 16px; margin-bottom:12px; font-size:.92rem; color:#12403c; grid-column:1/-1;}
   .qlead b{font-size:1.02rem;}
+  .tcard.stub2{border-style:dashed; background:#fbfaf5; box-shadow:none;}
+  .tcard.stub2 h3{color:#4b5563; font-size:.98rem;}
+  .tcard.stub2 p{color:var(--muted);}
+  .badge.horizon{background:#eef0f3; color:#4b5563;}
   @media (min-width:640px){ .grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;} .grid .tcard{margin-bottom:0;} }
 </style>
 </head>
@@ -1333,7 +1337,7 @@ function renderChips(){
   $('#vtog').innerHTML=[['subject','📚 By subject'],['question','🧑‍🏫 By teaching question']].map(([v,l])=>`<button class="chip ${viewMode===v?'active':''}" data-v="${v}">${l}</button>`).join('');
   document.querySelectorAll('#vtog .chip').forEach(c=>c.addEventListener('click',()=>{viewMode=c.dataset.v; renderChips(); renderList();}));
   if(viewMode==='subject'){
-    $('#chips').innerHTML=['All','★ My Matrix',...DISCS].map(d=>`<button class="chip ${d===activeDisc?'active':''}" data-d="${esc(d)}">${esc(d)}</button>`).join('');
+    $('#chips').innerHTML=['All','★ My Matrix',...ALLCATS].map(d=>`<button class="chip ${d===activeDisc?'active':''}" data-d="${esc(d)}">${esc(d)}</button>`).join('');
     document.querySelectorAll('#chips .chip').forEach(c=>c.addEventListener('click',()=>{activeDisc=c.dataset.d; renderChips(); renderList();}));
   }else{
     $('#chips').innerHTML=TEACH.map((t,i)=>`<button class="chip ${i===activeQ?'active':''}" data-i="${i}">${esc(t.label)}</button>`).join('');
@@ -1348,22 +1352,58 @@ function matches(t,q){
 function renderList(){
   $('#detail').classList.add('hidden'); $('#list').classList.remove('hidden'); $('.toolbar').classList.remove('hidden'); $('#chips').classList.remove('hidden'); $('#vtog').classList.remove('hidden');
   const q=$('#q').value.trim();
-  let items, lead='';
-  if(viewMode==='question'){
-    const cl=TEACH[activeQ];
-    items=cl.ids.map(id=>byId(id)).filter(Boolean).filter(t=>matches(t,q));
-    lead=`<div class="qlead"><b>${esc(cl.q)}</b><br>${esc(cl.why)}</div>`;
-  }else{
-    items=THEORIES.filter(t=>(activeDisc==='All'||(activeDisc==='★ My Matrix'?t.dis:t.discipline===activeDisc))&&matches(t,q));
-  }
-  $('#list').innerHTML=lead+(items.length?items.map(t=>`
+  const card=t=>`
     <div class="tcard" data-id="${t.id}">
       <div class="disc">${esc(t.discipline)}</div>
       <h3>${esc(t.name)}${t.dis?'<span class="badge" style="background:var(--accent-soft);color:#134441;">★ matrix</span>':''}${t.depth==='starter'?'<span class="badge">starter</span>':''}</h3>
       <div class="who">${esc(t.theorists)}</div>
       <p>${esc(t.tagline)}</p>
-    </div>`).join(''):'<div class="empty">No theories match that search.</div>');
-  document.querySelectorAll('.tcard').forEach(c=>c.addEventListener('click',()=>showDetail(c.dataset.id)));
+    </div>`;
+  const stubCard=(cat,s,si)=>`
+    <div class="tcard stub2" data-cat="${esc(cat)}" data-si="${si}">
+      <div class="disc">${esc(cat)}</div>
+      <h3>${esc(s[0])}<span class="badge horizon">on the horizon</span></h3>
+      <p>${esc(s[1])}</p>
+    </div>`;
+  const stubMatch=(s)=>!q||((s[0]+' '+s[1]).toLowerCase().includes(q.toLowerCase()));
+  let html='', count=0, lead='';
+  if(viewMode==='question'){
+    const cl=TEACH[activeQ];
+    const items=cl.ids.map(id=>byId(id)).filter(Boolean).filter(t=>matches(t,q));
+    count=items.length;
+    lead=`<div class="qlead"><b>${esc(cl.q)}</b><br>${esc(cl.why)}</div>`;
+    html=items.map(card).join('');
+  }else if(activeDisc==='★ My Matrix'){
+    const items=THEORIES.filter(t=>t.dis&&matches(t,q));
+    count=items.length; html=items.map(card).join('');
+  }else{
+    const cats=activeDisc==='All'?ALLCATS:[activeDisc];
+    cats.forEach(cat=>{
+      const built=THEORIES.filter(t=>t.discipline===cat&&matches(t,q));
+      const stubs=(STUBS[cat]||[]).map((s,si)=>[s,si]).filter(([s])=>stubMatch(s));
+      count+=built.length+stubs.length;
+      html+=built.map(card).join('')+stubs.map(([s,si])=>stubCard(cat,s,si)).join('');
+    });
+  }
+  $('#list').innerHTML=lead+(count?html:'<div class="empty">No theories match that search.</div>');
+  document.querySelectorAll('.tcard:not(.stub2)').forEach(c=>c.addEventListener('click',()=>showDetail(c.dataset.id)));
+  document.querySelectorAll('.tcard.stub2').forEach(c=>c.addEventListener('click',()=>showStub(c.dataset.cat,+c.dataset.si)));
+}
+function showStub(cat,si){
+  const s=(STUBS[cat]||[])[si]; if(!s) return;
+  $('#list').classList.add('hidden'); $('.toolbar').classList.add('hidden'); $('#chips').classList.add('hidden'); $('#vtog').classList.add('hidden');
+  const d=$('#detail'); d.classList.remove('hidden');
+  d.innerHTML=`<div class="detail">
+    <button class="backbtn">← All theories</button>
+    <div style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:700;">${esc(cat)}</div>
+    <h2>${esc(s[0])}</h2>
+    <p style="font-size:.98rem;"><em>${esc(s[1])}</em></p>
+    <section><h4>Status</h4>
+      <p style="font-size:.94rem;">This theory is mapped but not yet built out. To add the full entry — origins, core claims, key constructs, applications, critiques, and APA references — ask Claude: <b>"Build out ${esc(s[0])}"</b>, then upload the updated file to GitHub. It will join the flashcards and comparisons automatically.</p>
+    </section>
+  </div>`;
+  d.querySelector('.backbtn').addEventListener('click',renderList);
+  window.scrollTo({top:0});
 }
 function sec(title,inner){ return inner?`<section><h4>${title}</h4>${inner}</section>`:''; }
 function list(items){ return items&&items.length?'<ul>'+items.map(i=>`<li>${esc(i)}</li>`).join('')+'</ul>':''; }
@@ -1673,11 +1713,11 @@ const STUBS = {
  ["Digital Divide & Digital Equity (Warschauer)","Access, use, and outcome gaps; technology amplifies existing pedagogy."],
  ["AI in Education & Learning Analytics","Adaptive systems, generative AI, and the ethics and evidence of algorithmic education."]]
 };
+const ALLCATS=[...DISCS, ...Object.keys(STUBS).filter(k=>!DISCS.includes(k))];
 function renderIndex(){
   const area=$('#index-area');
   let builtT=0, allT=0, html='';
-  const CATS=[...DISCS, ...Object.keys(STUBS).filter(k=>!DISCS.includes(k))];
-  CATS.forEach(d=>{
+  ALLCATS.forEach(d=>{
     const built=THEORIES.filter(t=>t.discipline===d);
     const stubs=STUBS[d]||[];
     builtT+=built.length; allT+=built.length+stubs.length;
