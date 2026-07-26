@@ -1,4 +1,4 @@
-const CACHE = 'theory-lab-v10';
+const CACHE = 'theory-lab-v21';
 const ASSETS = ['./', './index.html', './reference.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
