@@ -59,6 +59,40 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   .detail li{margin-bottom:6px; font-size:.94rem;}
   .construct{margin-bottom:8px; font-size:.94rem;}
   .construct b{color:#123c39;}
+  /* --- accessibility (v23) --- */
+  .skiplink{position:absolute; left:-9999px; top:0; z-index:200; background:var(--accent,#F0A500); color:#1A2332;
+            font-family:Arial,sans-serif; font-weight:700; padding:10px 16px; border-radius:0 0 10px 0; text-decoration:none;}
+  .skiplink:focus{left:0;}
+  a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible{
+    outline:3px solid var(--accent,#F0A500); outline-offset:2px; border-radius:4px;}
+  .detail h2:focus{outline:none;}
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important; scroll-behavior:auto !important;} }
+  .citebtn{font-family:Arial,sans-serif; font-size:.78rem; padding:7px 13px; border-radius:999px;
+    border:1px solid var(--line,#E7E3DA); background:#fff; cursor:pointer; margin:6px 6px 0 0;}
+  .citebtn.done{background:#E4F0EE; border-color:#17B3A6; color:#14524D;}
+  @media print{
+    #nav, .toolbar, .backbtn, .skiplink, .citebtn, #chips, #vtog{display:none !important;}
+    body{background:#fff;} .detail{border:none; padding:0;}
+    .hidden{display:block !important;}
+  }
+  /* --- My Framework (v24) --- */
+  .fwrow{display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 4px;}
+  .fwbtn{font-family:Arial,sans-serif; font-size:.74rem; padding:7px 12px; border-radius:999px;
+    border:1px solid var(--line,#E7E3DA); background:#fff; cursor:pointer;}
+  .fwbtn.on{background:#1A2332; border-color:#1A2332; color:#fff;}
+  .fwbtn.on.fw-framework{background:#14524D; border-color:#14524D;}
+  .fwbtn.on.fw-method{background:#7A5A0A; border-color:#7A5A0A;}
+  .fwbtn.on.fw-lit{background:#4B3563; border-color:#4B3563;}
+  .fwbtn.on.fw-considered{background:#6B7280; border-color:#6B7280;}
+  .fwlabel{font-family:Arial,sans-serif; font-size:.66rem; text-transform:uppercase; letter-spacing:.08em; color:#6B7280; margin-top:12px;}
+  .fwgroup{margin-bottom:22px;}
+  .fwgroup h3{font-family:'Montserrat',Arial,sans-serif; font-size:.8rem; letter-spacing:.1em; text-transform:uppercase; margin-bottom:6px;}
+  .fwitem{display:flex; justify-content:space-between; align-items:center; gap:8px;
+    background:#fff; border:1px solid var(--line,#E7E3DA); border-radius:10px; padding:10px 12px; margin-bottom:6px;}
+  .fwitem b{font-size:.95rem;} .fwitem .rm{font-size:.72rem; color:#9C3D3D; background:none; border:none; cursor:pointer;}
+  .fwnote{width:100%; min-height:70px; font-family:Arial,sans-serif; font-size:.86rem;
+    border:1px solid var(--line,#E7E3DA); border-radius:10px; padding:9px 11px; margin-top:8px; background:#FAF9F7;}
+  .reflink{font-family:Arial,sans-serif; font-size:.72rem; white-space:nowrap; text-decoration:none; opacity:.85;}
   .refs li{font-size:.85rem; padding-left:1.5em; text-indent:-1.5em; list-style:none; margin-bottom:7px;}
   .refs{padding-left:4px !important;}
   .relrow{display:flex; flex-wrap:wrap; gap:6px;}
@@ -119,6 +153,7 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
 </style>
 </head>
 <body>
+<a class="skiplink" href="#tab-library">Skip to content</a>
 <header>
   <h1>The Theory <span class="lab">Lab</span></h1>
   <p>An EdD study companion — how people learn, understand, and apply knowledge</p>
@@ -129,6 +164,7 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   <button data-tab="cards">🃏 Flashcards</button>
   <button data-tab="compare">⚖️ Compare</button>
   <button data-tab="scenarios">🎯 Scenarios</button>
+  <button data-tab="framework">📓 My Framework</button>
   <button data-tab="index">🗂️ Index</button>
 </nav>
 <main>
@@ -174,6 +210,11 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   <!-- SCENARIOS -->
   <div id="tab-scenarios" class="hidden">
     <div id="scen-area"></div>
+  </div>
+
+  <!-- MY FRAMEWORK -->
+  <div id="tab-framework" class="hidden">
+    <div id="fw-area"></div>
   </div>
 
   <!-- MASTER INDEX -->
@@ -1992,66 +2033,220 @@ const THEORIES = [
  related:["nls","writing_sociocultural","transfer","hcd","toulmin"],
  refs:["Hicks, T. (2013). Crafting digital writing: Composing texts across media and genres. Heinemann.","New London Group. (1996). A pedagogy of multiliteracies: Designing social futures. Harvard Educational Review, 66(1), 60–92."]
 },
+{
+ id:"formative", name:"Formative Assessment", discipline:"Education & Pedagogy", depth:"deep", dis:true,
+ theorists:"Paul Black, Dylan Wiliam; Siobhán Leahy, Christine Lyon, Marnie Thompson; earlier: Michael Scriven, Benjamin Bloom",
+ tagline:"Assessment is formative only when the evidence it produces actually changes what happens next — for the teacher, the peer, or the learner.",
+ problem:"A teacher gives a quiz, records the scores, and teaches the next unit on schedule. A district calls its three-times-yearly benchmark test 'formative' because the results arrive before the state test. A department writes beautiful rubrics that students never use to revise anything. In every case assessment happened and instruction did not change — which is precisely the condition this theory exists to name. Black and Wiliam's contribution was to define formative assessment not by an instrument, a timing, or a label, but by a consequence: evidence is formative to the extent that it is elicited, interpreted, and used to make a better-founded decision about what to do next. That definition disqualifies most of what schools call formative, which is exactly why it is worth teaching.",
+ asks:["What makes assessment formative — the instrument, the timing, or the use of the evidence?","How can teachers gather evidence from every student rather than the confident few?","What kinds of feedback move learning forward, and which reliably do not?","Can students and peers act as legitimate sources and users of assessment evidence?","Why does the label 'formative' migrate so easily onto practices that change nothing?"],
+ origins:"Michael Scriven coined the formative/summative distinction for program evaluation in 1967; Benjamin Bloom imported it to classrooms through mastery learning. The modern research program begins with Black and Wiliam's 1998 review in Assessment in Education, which synthesized roughly 250 studies and argued that strengthening classroom formative practice produces learning gains among the largest reported for any educational intervention — and their companion Phi Delta Kappan article, 'Inside the Black Box,' which put the argument in practitioners' hands. The 2009 theory paper tightened the definition to a decision-consequence test, and the five-strategies framework (Leahy, Lyon, Thompson & Wiliam, 2005) converted it into classroom practice.",
+ claims:["Assessment is formative by consequence, not by format: evidence must be elicited, interpreted, and used to make a better-founded instructional decision than would otherwise have been made.","Frequent, low-stakes evidence from ALL students beats high-quality evidence from a self-selected few — steering by volunteers is steering by a biased sample.","Feedback functions formatively only when it causes learning-directed action; feedback with no next attempt is an autopsy.","Grades and comments together tend to nullify the comments: attention goes to the score.","Students and peers are not just objects of assessment but agents of it — activating them is a strategy, not a courtesy.","Learners cannot close a gap toward quality they cannot yet perceive, so sharing intentions and criteria is a precondition, not a nicety."],
+ constructs:["<b>The five key strategies</b> — clarifying and sharing learning intentions and success criteria; engineering effective discussions, tasks, and questions that elicit evidence; providing feedback that moves learners forward; activating students as instructional resources for one another; activating students as owners of their own learning.","<b>Elicit → interpret → use</b> — the three-step test that decides whether a practice is formative at all.","<b>All-student response</b> — mini-whiteboards, exit tickets, ABCD cards: techniques whose point is the sample, not the novelty.","<b>Comment-only marking</b> — feedback without a grade attached, so the comment is what gets attended to.","<b>Short-cycle vs. long-cycle</b> — minute-by-minute and day-by-day practice, distinguished from the interim testing that borrowed the name.","<b>Sadler's three conditions</b> — the learner must hold a concept of quality, compare current work to it, and act to close the gap."],
+ iftrue:{
+  teachers:"Ask the disqualifying question of every assessment you give: what decision will this change? If the honest answer is none, the instrument is summative regardless of its label. Build all-student response into the middle of lessons rather than sampling volunteers, and treat a 50/50 split as an instruction to branch, not to proceed. Separate comments from grades where you can — and where you cannot, put the comment on a draft that will be revised. Give students the criteria before the work, examined against real examples rather than announced.",
+  coaches:"The highest-leverage coaching question is not 'what did you assess?' but 'what did you change?' Help teachers see that the evidence-gathering half is the easy half; the steering is where the practice lives or dies. When a teacher says formative assessment 'didn't work,' check three things in order: was evidence gathered from everyone, was it interpreted before the next decision, and did any decision actually differ. Expect the diagnosis to be in the third.",
+  leaders:"Guard the vocabulary. When 'formative' is applied to interim benchmark testing, the term stops meaning anything and the practice with the strong evidence base gets confused with the practice that has little. Protect short-cycle classroom practice from being displaced by data systems that report to adults on a six-week delay. And resist mandating formative assessment as a compliance artifact — a required exit ticket that no one reads is the failure mode this theory predicts.",
+  researchers:"Formative assessment is a family of practices, not a single treatment, which makes clean effect estimation genuinely difficult — a limitation the field now acknowledges openly. Fruitful designs specify which of the five strategies is being manipulated, measure implementation fidelity, and treat the responsive decision as the mediating variable rather than assuming it. Practitioner-researchers are unusually well positioned here: the unit of study is a decision, and you are the one making it."},
+ reasoning:{
+  notice:["Whether evidence is being gathered from every student or only from those who volunteer it.","What happens in the ten minutes AFTER evidence arrives — that interval is where formative practice actually lives.","Whether feedback lands before a next attempt exists, or after the work is finished and filed.","Whether students can state what quality looks like in their own words, or only where the rubric is posted.","Whether 'formative' in your building names a classroom practice or a testing calendar."],
+  assume:["That giving the assessment is the intervention. It is the input; the decision is the intervention.","That more frequent testing is more formative. Frequency without responsiveness is just more testing.","That students understand criteria because they were distributed.","That the 1998 review's headline effect sizes are settled science — later analyses report considerably smaller and more variable effects."],
+  decide:["Whether to proceed, re-teach, or branch — and to make that call from the distribution rather than the loudest signal.","Which single next step feedback should name, given that one actionable move outperforms ten corrections.","Whether the assessment you are about to give will change anything; if not, whether it is worth the minutes.","Whether to spend scarce time on better instruments or on better use of the instruments you have. The evidence favors use."],
+  avoid:["Calling interim benchmark testing formative assessment — the definitional slide that has done the most damage to this literature's usefulness.","Attaching grades to work you want students to learn from.","Collecting exit tickets you will not read; students learn quickly which artifacts are decorative.","Treating the effect-size claim as a promise rather than as a contested estimate."]},
+ competing:[
+  {scenario:"A school adopts three benchmark assessments a year and calls it a formative assessment system.",
+   thisView:"Almost none of the mechanism is present: the cycle is far too long to change instruction for these students on this content, the evidence rarely reaches the learner in usable form, and no one is activated as an owner of their own learning. The name has migrated; the practice has not.",
+   other:"Data-Driven Decision Making / Improvement Science",
+   otherView:"Interim data serve a real and different purpose: they reveal patterns across classrooms and cohorts that no single teacher can see, and they inform system-level decisions about curriculum, staffing, and support. The error is not in collecting them but in expecting them to do a job they were never designed for.",
+   agree:"Both agree the two practices operate on different clocks and answer different questions — and both regard collapsing them under one word as the source of the confusion. Short-cycle assessment steers a lesson; interim data steer a system."},
+  {scenario:"A teacher's careful written feedback is read and ignored, draft after draft.",
+   thisView:"Check the conditions before blaming the student: was there a next attempt for the feedback to land on, was a grade attached that captured the attention, and did the comment name one actionable move or ten corrections?",
+   other:"Feedback research (Hattie & Timperley; Kluger & DeNisi)",
+   otherView:"Feedback is not reliably beneficial at all — over a third of studied interventions made performance worse, and the strongest predictor of harm is feedback directed at the self rather than the task. The question is not only whether feedback is used but whether it should have been given in that form.",
+   agree:"Complete convergence in practice: feedback must be task-focused, actionable, and delivered while a next attempt exists. Formative assessment supplies the timing condition; the feedback literature supplies the content condition, and both are necessary."}],
+ applications:["Replacing hands-up questioning with all-student response so the evidence stops sampling confidence.","Exit tickets that are read the same day and visibly change the next lesson's opening.","Comment-only marking on drafts, with the revision assessed partly on what the feedback produced.","Co-constructing success criteria by sorting strong and weak anonymous work samples before students begin.","Peer feedback trained against explicit criteria, which activates students as resources for one another.","Self-assessment against criteria at closure — the practice that eventually makes the teacher's role smaller."],
+ critiques:["<b>The effect size problem.</b> The 1998 review reported gains of roughly 0.4–0.7 standard deviations, a figure that entered policy discourse as settled fact. It was a narrative synthesis, not a meta-analysis, and Bennett (2011) and Kingston and Nash (2011) argued the estimate is not well founded — the latter's meta-analysis reported closer to 0.20. Wiliam himself has since called the original figures unhelpfully imprecise. The practice retains strong warrant; the headline number does not.","<b>Definitional slipperiness.</b> If formative assessment is defined by consequence, its boundaries are hard to fix and almost any responsive teaching qualifies — which makes the construct difficult to study cleanly and easy to co-opt.","<b>Co-optation in practice.</b> The term has been attached to commercial interim testing products whose cycle length makes the mechanism impossible.","<b>Implementation burden.</b> The five strategies ask for real changes in questioning, marking, and planning; mandated shallowly, they produce compliance artifacts rather than responsive teaching.","<b>Equity caution.</b> Responsive teaching can widen gaps if responsiveness tracks teacher expectations — the evidence must actually come from every student, including those a teacher has quietly stopped calling on."],
+ research:{
+  questions:["Which of the five strategies carries the most weight, and does that vary by content area or grade band?","What distinguishes teachers whose formative practice changes decisions from those whose practice changes only paperwork?","How does the responsive decision mediate between evidence collection and student outcomes?","What conditions cause feedback to be used rather than read?","How do interim testing systems affect the quality of short-cycle practice in the same building?"],
+  methods:["Classroom observation with fidelity measures for named strategies rather than for 'formative assessment' generally.","Teacher decision logs paired with student work — a design well suited to practitioner research.","Design-based research iterating on a specific strategy in an authentic setting.","Discourse analysis of questioning patterns to examine whose evidence is actually gathered."],
+  variables:["Independent: presence and quality of a specific strategy; cycle length; grade attachment.","Mediating: the instructional decision made after evidence (the theory's core mechanism, and the most frequently unmeasured).","Dependent: student achievement, revision quality, self-assessment accuracy, participation distribution.","Control: prior achievement, content, teacher experience, implementation fidelity."],
+  support:"Robust in principle, contested in magnitude. Black and Wiliam's reviews established formative practice as one of the more promising levers available inside ordinary classrooms, and the component mechanisms — feedback that is task-focused and actionable, all-student response, criteria made visible through examples — each carry independent support. The honest caveats are that the widely quoted effect sizes have not survived scrutiny, that the construct's breadth makes clean estimation difficult, and that effects run entirely through the teacher's responsive decision, which most studies infer rather than measure."},
+ reflect:["Take the last assessment you gave. What decision did it change? If none, what would have had to be different?","Whose evidence does your questioning routine actually gather — and who has learned that they will not be asked?","Where in your practice do grades and comments arrive together, and what would it cost to separate them?","When your school says 'formative,' which practice does it mean? Does the vocabulary help or hide?","If you removed every assessment that changes no decision, how much time would you recover — and what would you spend it on?"],
+ constellation:{
+  complements:["srl","desirable","socialcognitive"],
+  contrasts:["behaviorism","improvement"],
+  pairs:["improvement"]},
+ related:["srl","desirable","improvement","socialcognitive"],
+ compare:{
+  learner:"A student who can perceive quality, judge their own work against it, and act to close the gap",
+  mechanism:"Evidence elicited, interpreted, and used to make a better-founded next decision",
+  instructor:"A decision-maker who steers on evidence from every student rather than impressions",
+  knowledge:"Provisional and visible — what students can currently do, gathered while it can still be acted on",
+  critique:"Headline effect sizes are contested and the term has been co-opted by interim testing"},
+ refs:[
+  {r:"Black, P., & Wiliam, D. (1998). Assessment and classroom learning. <i>Assessment in Education: Principles, Policy & Practice, 5</i>(1), 7–74.", url:"https://doi.org/10.1080/0969595980050102"},
+  {r:"Black, P., & Wiliam, D. (1998). Inside the black box: Raising standards through classroom assessment. <i>Phi Delta Kappan, 80</i>(2), 139–148."},
+  {r:"Black, P., & Wiliam, D. (2009). Developing the theory of formative assessment. <i>Educational Assessment, Evaluation and Accountability, 21</i>(1), 5–31.", url:"https://doi.org/10.1007/s11092-008-9068-5"},
+  {r:"Wiliam, D. (2011). <i>Embedded formative assessment.</i> Solution Tree Press."},
+  {r:"Leahy, S., Lyon, C., Thompson, M., & Wiliam, D. (2005). Classroom assessment: Minute by minute, day by day. <i>Educational Leadership, 63</i>(3), 19–24."},
+  {r:"Sadler, D. R. (1989). Formative assessment and the design of instructional systems. <i>Instructional Science, 18</i>(2), 119–144.", url:"https://doi.org/10.1007/BF00117714"},
+  {r:"Kingston, N., & Nash, B. (2011). Formative assessment: A meta-analysis and a call for research. <i>Educational Measurement: Issues and Practice, 30</i>(4), 28–37.", url:"https://doi.org/10.1111/j.1745-3992.2011.00220.x"},
+  {r:"Bennett, R. E. (2011). Formative assessment: A critical review. <i>Assessment in Education: Principles, Policy & Practice, 18</i>(1), 5–25.", url:"https://doi.org/10.1080/0969594X.2010.513678"}]
+},
+{
+ id:"improvement", name:"Improvement Science", discipline:"Research & Methodology", depth:"deep", dis:true,
+ theorists:"Anthony S. Bryk, Louis M. Gomez, Alicia Grunow, Paul G. LeMahieu (Carnegie Foundation); lineage: Walter Shewhart, W. Edwards Deming, Donald Berwick and the healthcare improvement tradition",
+ tagline:"Getting better at getting better: disciplined, rapid inquiry into the system that produces current results — rather than another initiative aimed at people inside it.",
+ problem:"A district adopts a promising program that worked elsewhere. Implementation is uneven, results disappoint, and within three years it is replaced by the next promising program. Nobody learns why it failed here, because nobody studied the system it landed in. Improvement science exists to break that cycle. Its founding observation is that education has an implementation problem more than a knowledge problem: we know a great deal about what can work and remarkably little about how to make it work reliably, at scale, across variable conditions. It reframes the question from 'what works?' to 'what works, for whom, under what conditions — and how would we know?'",
+ asks:["Why do interventions that work in one setting fail to travel to another?","What is the system currently producing, and what about it produces that?","How can practitioners test changes fast enough to learn before the year ends?","What measures would tell us whether a change is an improvement — as opposed to whether we complied?","How does knowledge accumulate across schools rather than being rediscovered in each one?"],
+ origins:"The methods descend from industrial quality improvement — Shewhart's control charts, Deming's system view and Plan–Do–Study–Act cycles — routed through healthcare, where the Institute for Healthcare Improvement demonstrated that rapid-cycle testing could reduce mortality in ways program evaluation could not. Anthony Bryk and colleagues at the Carnegie Foundation adapted the tradition for education in the 2010s, arguing in <i>Learning to Improve</i> (2015) that education's chronic failure to scale reforms was a methodological problem with a methodological answer. Carnegie's networked improvement communities — beginning with the community-college developmental mathematics pathways — were the proof case.",
+ claims:["<b>Every system is perfectly designed to get the results it gets.</b> Outcomes are produced by systems, not by the will or virtue of the people inside them.","Variation in performance is the central problem to study, not noise to average away — 'what works' is the wrong question without 'for whom, under what conditions.'","Improvement requires disciplined inquiry: change ideas are hypotheses to be tested in small, fast cycles, not decisions to be implemented and defended.","You cannot improve at scale what you cannot measure — but the measurement must be practical (usable by practitioners in real time), not the accountability measurement schools already drown in.","Improvement work must be problem-specific and user-centered: begin with the people doing the work and the problem as they experience it.","Knowledge accumulates faster through networked improvement communities than through isolated sites, because variation across sites becomes data rather than noise."],
+ constructs:["<b>The six core principles</b> — make the work problem-specific and user-centered; focus on variation in performance; see the system that produces current outcomes; measure what matters for improvement; anchor practice in disciplined inquiry; accelerate learning through networked communities.","<b>PDSA cycle</b> — Plan, Do, Study, Act: a small test of change, run fast, studied against a prediction.","<b>Driver diagram</b> — a working theory of improvement: aim → primary drivers → secondary drivers → change ideas, revised as evidence arrives.","<b>Practical measurement</b> — brief, embedded measures for learning within cycles, distinguished from accountability and research measurement.","<b>Networked Improvement Community (NIC)</b> — sites bound by a common aim, a shared working theory, and disciplined methods, so learning compounds across them.","<b>90-day cycle</b> — a bounded scan-and-synthesize inquiry used before committing to a direction.","<b>See the system</b> — process mapping, root-cause analysis, and fishbone diagrams applied to a local problem of practice."],
+ iftrue:{
+  teachers:"Your classroom is a system, and the results it produces are being produced by something — sequence, routine, timing, materials — not by student character. Improvement science gives you permission to test one small change against a prediction rather than overhaul everything: change one thing, in one class, for two weeks, with a measure you can actually collect. A change that fails and teaches you something is a successful cycle, which is a genuinely different relationship to failure than most school cultures offer.",
+  coaches:"This is the methodology that makes coaching cumulative rather than episodic. Help teams state an aim with a number and a date, build a driver diagram so the theory is visible and arguable, and run small tests instead of launching initiatives. Guard the discipline that gets dropped first: the prediction. Without 'by ___ I expect ___ because ___,' a PDSA cycle degenerates into trying things. And insist on practical measurement — if the measure requires the data office, the cycle is too slow to learn from.",
+  leaders:"The central discipline is refusing to blame people for a system's output — and the central temptation is to keep launching initiatives because initiatives are visible and system study is not. Improvement science asks leaders to slow down at the start (understand the problem and the system before choosing a solution) in order to move faster afterward. It also asks for a real tolerance for tested failure; if failed cycles are career-costly, teams will report only successes and the method dies quietly.",
+  researchers:"Improvement science is a methodology, not a theory of learning — a distinction dissertation committees will press. It is well suited to practitioner-scholars studying their own contexts, and it pairs naturally with design-based research, though the two aim at different products: DBR generates theory, improvement science generates reliable process. Expect to defend measurement quality, the warrant for causal claims from small tests, and the boundary between improvement work and generalizable research — including, in most institutions, whether your work requires IRB review at all."},
+ reasoning:{
+  notice:["What the system currently produces, in numbers, before proposing any change.","Where the variation is — across classrooms, sections, subgroups, times of year. Variation is the finding, not the noise.","Whether the problem was defined by the people who experience it or by the people proposing the solution.","Whether anyone wrote down a prediction before the change was tried.","How long the feedback loop is: if you learn whether a change worked in June, you cannot improve during the year."],
+  assume:["That the solution is known and only implementation is lacking. That assumption skips the system study where the actual problem usually lives.","That a program that worked elsewhere will work here — the conditions that made it work are rarely part of what gets transferred.","That measuring more is measuring better. Accountability data are usually the wrong instrument for learning within cycles.","That improvement science, being a methodology, is neutral about what counts as a worthy aim. Aims encode values; whose problem gets solved is a choice."],
+  decide:["What single small change to test next, at the smallest scale that could teach you something.","What you predict will happen, by when, and why — written before the test.","Whether an observed change is signal or ordinary variation.","Whether to adopt, adapt, or abandon after a cycle — all three being legitimate outcomes.","Whether this problem needs a system study or genuinely needs a solution you already trust."],
+  avoid:["Launching an initiative when you could run a test — the difference is scale, reversibility, and whether anyone will learn.","Skipping the prediction, which converts inquiry into activity.","Studying only the sites where things went well; the variation is the data.","Importing industrial vocabulary into a school culture without translating it — 'defect' and 'production' land badly in rooms full of children.","Treating equity as a downstream outcome of better processes rather than as a design commitment in the aim itself."]},
+ competing:[
+  {scenario:"A doctoral candidate wants to study a change she is making in her own school.",
+   thisView:"Frame an aim with a measure, map the system producing current results, build a driver diagram, and run PDSA cycles — the product is a reliable local process and knowledge about the conditions it depends on.",
+   other:"Design-Based Research",
+   otherView:"Embody your conjectures from learning theory in a designed intervention and study the mediating processes across iterations — the product is instructional theory that travels, not just a process that works here.",
+   agree:"Openly siblings: both iterate in authentic settings with practitioners as partners and reject the idea that context is a nuisance variable. Choose by product — dependable local process versus generalizable design theory — and say which one you chose, because committees ask."},
+  {scenario:"A school's discipline data show large disparities by race.",
+   thisView:"See the system: map referral pathways, study variation across classrooms and times of day, find the drivers, and test changes with practical measures on a fast cycle.",
+   other:"Critical Pedagogy / critical race theories of education",
+   otherView:"Process improvement can optimize an unjust system into running more smoothly. The disparities are produced by structures and beliefs that a driver diagram will not surface, and framing them as a technical problem risks depoliticizing what is fundamentally about power.",
+   agree:"The most defensible practice holds both: name the equity commitment inside the aim rather than treating it as an outcome, let critical analysis identify what to look at, and let improvement methods test whether anything actually changed. Carnegie's later work moves in this direction — a response to precisely this critique."}],
+ applications:["A ninth-grade team running two-week PDSA cycles on a single attendance driver rather than adopting an attendance program.","A driver diagram built with teachers to make a team's working theory of a problem visible and arguable.","Practical measures — a three-item exit survey, a weekly work-sample count — designed for the cycle, not for the state.","A networked improvement community across schools sharing one aim and one measurement system.","A 90-day scan before committing to a direction on a stubborn problem.","Process mapping the referral pathway before designing any discipline intervention."],
+ critiques:["<b>Industrial provenance.</b> The methods came from manufacturing and healthcare, where outputs are more standardized and causality shorter. Whether they translate to teaching — where the 'product' is contested and the causal chains are long — remains genuinely disputed.","<b>Technocratic risk.</b> Framing educational problems as system-design problems can obscure questions of power, politics, and purpose. A more efficient path to a bad aim is not an improvement, and improvement science's own vocabulary offers limited resources for arguing about aims.","<b>Equity as afterthought.</b> Early applications were criticized for treating equity as an outcome to be measured rather than a commitment to be designed in; the field has responded, but the critique shaped it.","<b>Resource intensity.</b> NICs need hubs, facilitation, measurement infrastructure, and protected time. Schools attempt them without any of these and conclude the method does not work.","<b>Evidentiary standing.</b> Small, fast tests support local learning but warrant causal claims weakly; improvement work and generalizable research are not the same product, and conflating them invites methodological objections.","<b>Vocabulary friction.</b> Deming's language can read as dehumanizing in schools, and adoption often stalls on the words before it reaches the ideas."],
+ research:{
+  questions:["Under what conditions do improvements achieved in one site transfer to another?","What distinguishes networked improvement communities that produce cumulative knowledge from those that produce meetings?","How does practical measurement affect the quality of practitioner decisions relative to accountability measurement?","Does making equity explicit in the aim change what improvement cycles actually surface?","What is the appropriate warrant for causal claims arising from iterative small tests?"],
+  methods:["PDSA cycles with documented predictions and run charts.","Run and control charts to distinguish signal from ordinary variation.","Driver diagrams as explicit, revisable theories of improvement.","Process mapping and root-cause analysis of local systems.","Mixed methods across a network, treating site variation as the object of study."],
+  variables:["Independent: the change idea being tested; the driver it targets.","Mediating: fidelity, local conditions, and the practitioner decisions the measures inform.","Dependent: the practical measure tied to the aim, plus balancing measures for unintended effects.","Contextual: the site conditions that determine whether a change travels — the variables improvement science treats as primary rather than as controls."],
+  support:"Strong in healthcare, promising and less settled in education. Carnegie's developmental mathematics pathways (Statway and Quantway) are the most cited education case, reporting substantially improved completion rates relative to traditional sequences. Beyond such flagship cases the evidence base is younger and thinner, and reviews note that improvement work's own methods — small, local, iterative — are not designed to produce the kind of causal evidence that would settle its effectiveness by conventional standards. That tension is intrinsic rather than accidental, and it is worth naming plainly in a methods chapter."},
+ reflect:["Name a problem in your building that has survived at least two solutions. What about the system keeps producing it?","Where does variation in your results live — and have you ever studied the variation instead of averaging it?","When did you last write a prediction down before trying something? What did it cost you not to?","Whose problem is your current improvement effort solving — and were they in the room when it was defined?","What would it take, in your setting, for a failed test to be safe to report?"],
+ constellation:{
+  complements:["formative","dbr","srl"],
+  contrasts:["freire","behaviorism"],
+  pairs:["formative"]},
+ related:["formative","dbr","practitioner","srl"],
+ compare:{
+  learner:"Practitioners and organizations learning to improve their own systems",
+  mechanism:"Disciplined iterative testing of change ideas against predictions, in context",
+  instructor:"A facilitator or hub supporting inquiry — not an expert delivering a solution",
+  knowledge:"Practical and conditional: what works, for whom, under what conditions",
+  critique:"Industrial provenance, technocratic risk, and weak warrant for causal claims"},
+ refs:[
+  {r:"Bryk, A. S., Gomez, L. M., Grunow, A., & LeMahieu, P. G. (2015). <i>Learning to improve: How America's schools can get better at getting better.</i> Harvard Education Press.", url:"https://hep.gse.harvard.edu/9781612507934/learning-to-improve/"},
+  {r:"Bryk, A. S. (2015). 2014 AERA Distinguished Lecture: Accelerating how we learn to improve. <i>Educational Researcher, 44</i>(9), 467–477.", url:"https://doi.org/10.3102/0013189X15621543"},
+  {r:"Lewis, C. (2015). What is improvement science? Do we need it in education? <i>Educational Researcher, 44</i>(1), 54–61.", url:"https://doi.org/10.3102/0013189X15570388"},
+  {r:"LeMahieu, P. G., Grunow, A., Baker, L., Nordstrum, L. E., & Gomez, L. M. (2017). Networked improvement communities: The discipline of improvement science meets the power of networks. <i>Quality Assurance in Education, 25</i>(1), 5–25.", url:"https://doi.org/10.1108/QAE-12-2016-0084"},
+  {r:"Langley, G. J., Moen, R. D., Nolan, K. M., Nolan, T. W., Norman, C. L., & Provost, L. P. (2009). <i>The improvement guide: A practical approach to enhancing organizational performance</i> (2nd ed.). Jossey-Bass."},
+  {r:"Deming, W. E. (1993). <i>The new economics for industry, government, education.</i> MIT Press."},
+  {r:"Hinnant-Crawford, B. N. (2020). <i>Improvement science in education: A primer.</i> Myers Education Press."}]
+}
 ];
 
 const SCENARIOS = [
-{scene:"A third-grade teacher gives points redeemable for prizes whenever students turn in homework. Completion jumps immediately — but when the point system ends in spring, completion falls below where it started. Which pair of theories best explains BOTH the rise and the fall?",
- options:["Behaviorism explains the rise; Self-Determination Theory explains the fall","Cognitive Load Theory explains the rise; Schema Theory explains the fall","Sociocultural Theory explains both","Expectancy-Value Theory explains the rise; Bloom's Taxonomy explains the fall"],
- answer:0, why:"Operant reinforcement predicts the immediate increase (behavior followed by reward is strengthened). SDT's undermining effect predicts the crash: contingent extrinsic rewards can crowd out whatever intrinsic or internalized motivation existed, so removal leaves less motivation than before."},
-{scene:"A doctoral student can recite the definition of 'zone of proximal development' perfectly but cannot recognize it operating in a classroom video. Which concept best names this problem?",
- options:["Inert knowledge (situated learning)","Extraneous cognitive load","A fixed mindset","Efferent stance (Rosenblatt)"],
- answer:0, why:"Situated learning theorists call knowledge that can be recited but not used 'inert' — a predicted result of learning concepts apart from authentic activity. The remedy is applying concepts within practice, exactly what this scenario tab is for."},
-{scene:"A middle-school math teacher demonstrates a new procedure while students watch, then has them study several fully worked solutions before trying problems on their own. Struggling students improve markedly. Which framework most directly predicts this result?",
- options:["Cognitive Load Theory (worked-example effect)","Critical pedagogy","Connectivism","Transformative learning"],
- answer:0, why:"CLT's worked-example effect: novices learn more from studying worked solutions than from unsupported problem solving, because problem search overloads working memory before schemas exist. Note the expertise reversal effect predicts this support should fade as students advance."},
-{scene:"After a unit on seasons, most students still explain that summer is warmer because Earth moves closer to the sun — despite having been told otherwise twice. Which theory best explains the persistence, and what does it prescribe?",
- options:["Conceptual change theory: create dissatisfaction with the misconception and offer an intelligible, plausible, fruitful alternative","Behaviorism: reinforce correct answers more consistently","Andragogy: adults need to know why they are learning","Simple View of Reading: improve decoding first"],
- answer:0, why:"Intuitive theories resist mere telling. Posner and colleagues argue accommodation requires dissatisfaction (e.g., a discrepant event — both hemispheres would be close simultaneously) plus a more fruitful alternative (axial tilt), not just repetition."},
-{scene:"A principal notices that students labeled 'low readers' in September receive fewer open-ended questions and less wait time all year, and end further behind. Which sociological lens most directly names this dynamic?",
- options:["Labeling and the self-fulfilling prophecy (symbolic interactionism)","Loss aversion (prospect theory)","The testing effect","Genre as social action"],
- answer:0, why:"Symbolic interactionism and labeling theory (Becker; Rist's classic classroom study) describe how institutional labels alter treatment and expectations, producing the very outcomes they predict. Attribution and expectation research supplies the micro-mechanisms."},
-{scene:"An EdD student designs professional development where teachers first try a new discussion protocol with their own students, then meet to reflect, extract principles, and plan a revised attempt next month. Which framework did she build the cycle on?",
- options:["Kolb's experiential learning cycle","Bloom's taxonomy","The Simple View of Reading","Dual-process theory"],
- answer:0, why:"Concrete experience (trying the protocol) → reflective observation (debrief) → abstract conceptualization (principles) → active experimentation (revised plan): Kolb's four modes in sequence, applied to adult professional learning."},
-{scene:"A fifth grader decodes a passage about cricket fluently but comprehends almost nothing; a classmate who just arrived from another country understands cricket deeply but stumbles on the words. Which framework best distinguishes their needs?",
- options:["Simple View of Reading: comprehension = decoding × language/knowledge, so each child has a different weak factor","Growth mindset: both need process praise","Communities of practice: both need legitimate peripheral participation","Backward design: start from desired results"],
- answer:0, why:"RC = D × LC. The first child has strong D but weak background knowledge/schema for cricket (LC side); the newcomer has strong LC for this topic but needs decoding support. Schema theory explains the first child's failure; the multiplicative model explains why each needs a different intervention."},
-{scene:"A university simplifies its aid-renewal form from twelve steps to three and sends two text reminders before the deadline. Renewals among first-generation students rise noticeably. Which framework does this intervention apply?",
- options:["Nudge theory / choice architecture — reducing friction (sludge)","Cognitive dissonance — insufficient justification","Culturally sustaining pedagogy","Metacognitive calibration"],
- answer:0, why:"Removing friction and adding timely salience are classic choice-architecture moves (Thaler & Sunstein; Castleman & Page's summer-melt studies). No preferences were changed — the path to an intended action was cleared."},
-{scene:"Two students fail the same statistics exam. One says, 'I'm just not a math person.' The other says, 'I only did massed rereading — I should space my practice and self-test.' Which pair of theories best captures the difference in their explanations?",
- options:["Attribution theory (stable/uncontrollable vs. unstable/controllable causes) and mindset theory","Prospect theory and flow theory","Schema theory and genre theory","Andragogy and connectivism"],
- answer:0, why:"Weiner: 'not a math person' is internal, stable, uncontrollable — it lowers expectancy and invites helplessness. The strategy attribution is unstable and controllable, preserving expectancy. The contrast also maps onto Dweck's fixed vs. growth mindsets, and the second student happens to be citing desirable difficulties correctly."},
+{scene:"A third-grade teacher gives points redeemable for prizes whenever students turn in homework. Completion jumps immediately — but when the point system ends in spring, completion falls BELOW where it started. Which account best explains both the rise and the below-baseline fall?",
+ options:["Behaviorism explains the rise; extinction explains the fall — the behavior simply returns to its unreinforced rate","Behaviorism explains the rise; Self-Determination Theory's undermining effect explains the fall","Expectancy-Value Theory explains both: the reward raised task value, and its removal lowered value further","Self-Determination Theory explains both: the reward was experienced as controlling from the first day"],
+ answer:1, why:"Operant reinforcement predicts the immediate increase. But SDT's undermining effect is what predicts a fall BELOW baseline: expected, contingent rewards can crowd out the intrinsic or internalized motivation that was doing the work before, so removal leaves less than there was.",
+ near:"Extinction is the sharpest competitor — and the discriminating detail is in the scenario: extinction predicts a return TO baseline, not below it. SDT-explains-both fails on the rise (rewards demonstrably worked at first). Expectancy-value is a real rival account of the fall, but it has no mechanism for value ending up lower than it began."},
+
+{scene:"A doctoral student can recite the definition of 'zone of proximal development' perfectly but cannot recognize it operating in a classroom video. Which concept most precisely names this problem?",
+ options:["Transfer of learning: no bridging or hugging was designed into her coursework","Inert knowledge (situated learning)","Schema theory: the concept was learned without an adequate set of exemplars","Expertise reversal: the definition was pitched above her current level"],
+ answer:1, why:"Situated learning theorists call knowledge that can be recited but not used 'inert' — a predicted result of learning concepts apart from authentic activity. The remedy is applying concepts within practice, exactly what this scenario tab is for.",
+ near:"Transfer is the closest call, and it is not wrong — but it names the mechanism that failed rather than the condition of the knowledge itself. Schema theory correctly diagnoses the missing exemplars but doesn't name the phenomenon. Expertise reversal is about support becoming counterproductive for experts — the wrong direction entirely."},
+
+{scene:"A middle-school math teacher demonstrates a new procedure while students watch, then has them study several fully worked solutions before trying problems on their own. Struggling students improve markedly. Which framework most directly predicts this specific result?",
+ options:["Social Cognitive Theory: students learned vicariously by observing a model","Sociocultural Theory: the teacher scaffolded within the zone of proximal development","Cognitive Load Theory: the worked-example effect","Cognitive apprenticeship: modeling, coaching, and fading"],
+ answer:2, why:"CLT's worked-example effect: novices learn more from studying worked solutions than from unsupported problem solving, because problem search overloads working memory before schemas exist. The expertise reversal effect predicts this support should fade as students advance.",
+ near:"All four are defensible readings of the lesson, which is the point. Modeling and scaffolding describe the demonstration accurately — but the result to be explained is that studying WORKED SOLUTIONS outperformed solving, and the worked-example effect is the finding that predicts exactly that, with a stated mechanism (reduced problem-search load) and a stated boundary (it reverses with expertise)."},
+
+{scene:"After a unit on seasons, most students still explain that summer is warmer because Earth moves closer to the sun — despite having been told otherwise twice. Which theory best explains the persistence and prescribes the remedy?",
+ options:["Dual-process theory: the intuitive System 1 answer arrives first and goes unchecked","Cognitive Load Theory: reduce extraneous load and reteach with a worked example","Schema theory: activate prior knowledge more thoroughly before reteaching","Conceptual change: create dissatisfaction with the misconception, then offer an intelligible, plausible, fruitful alternative"],
+ answer:3, why:"Intuitive theories resist mere telling. Posner and colleagues argue accommodation requires dissatisfaction (a discrepant event — both hemispheres would be close simultaneously) plus a more fruitful alternative (axial tilt), not repetition.",
+ near:"Dual-process correctly describes why the wrong answer is generated so fluently, but offers no account of why it survives instruction. Schema theory is close — assimilation without accommodation is the same event in different vocabulary — but its prescription here is backwards: activating a misconception more thoroughly entrenches it. Load is not the barrier; conviction is."},
+
+{scene:"A principal notices that students labeled 'low readers' in September receive fewer open-ended questions and less wait time all year, and end further behind. Which lens most directly names this dynamic?",
+ options:["Attribution theory: the teachers attribute low performance to stable, uncontrollable ability","Cognitive Load Theory: open-ended questions would overload struggling readers","Labeling and the self-fulfilling prophecy (symbolic interactionism)","Expectancy-Value Theory: the students' own expectancy of success declined"],
+ answer:2, why:"Symbolic interactionism and labeling theory (Becker; Rist's classic classroom study) describe how institutional labels alter treatment and expectations, producing the very outcomes they predict. Attribution and expectation research supplies the micro-mechanisms.",
+ near:"Attribution theory is genuinely operating and is the best distractor here — but it names what happens inside a teacher's head, while the scenario's subject is an institutional label producing a measurable outcome. Expectancy-value moves the action into the students, whom the scenario never quotes. The load answer is the one worth sitting with: it is a real rationalization teachers offer, and it converts a differentiated expectation into a pedagogical justification."},
+
+{scene:"An EdD student designs professional development where teachers first try a new discussion protocol with their own students, then meet to reflect, extract principles, and plan a revised attempt next month. Which framework is the cycle itself built on?",
+ options:["Improvement science: Plan–Do–Study–Act cycles","Kolb's experiential learning cycle","Design-based research: iterative enact–analyze–redesign cycles","Andragogy: adults need experience-based, problem-centered learning"],
+ answer:1, why:"Concrete experience (trying the protocol) → reflective observation (debrief) → abstract conceptualization (principles) → active experimentation (revised plan): Kolb's four modes in sequence, applied to adult professional learning.",
+ near:"This item is deliberately hard, because three of the four describe cycles. PDSA and DBR share Kolb's shape but answer different questions: PDSA is a method for improving a system, DBR a methodology for testing design conjectures as research. Neither is what the scenario describes — individual practitioners learning from their own experience. Andragogy explains why the design suits adults, but names conditions, not a cycle."},
+
+{scene:"A fifth grader decodes a passage about cricket fluently but comprehends almost nothing; a classmate who just arrived from another country understands cricket deeply but stumbles on the words. Which framework best distinguishes what each child needs?",
+ options:["Schema theory: the first child lacks a cricket schema to comprehend with","Scarborough's Reading Rope: many strands weave into skilled reading","Chall's stages: one child is learning to read, the other reading to learn","Simple View of Reading: comprehension = decoding × language comprehension, so each child has a different weak factor"],
+ answer:3, why:"RC = D × LC. The first child has strong D but weak background knowledge for cricket (the LC side); the newcomer has strong LC for this topic but needs decoding support. The multiplicative model is what makes each child's different weak factor explicit — and explains why one intervention would fail both.",
+ near:"Schema theory explains the first child completely and the second not at all — that asymmetry is the tell. The Reading Rope is the same territory, more elaborated, but its many strands make it a poorer instrument for this particular contrast than the two-factor product. Chall's stages describe typical development, not two children with mirror-image profiles at the same age."},
+
+{scene:"A university simplifies its aid-renewal form from twelve steps to three and sends two text reminders before the deadline. Renewals among first-generation students rise noticeably. Which framework best accounts for the result?",
+ options:["Nudge theory / choice architecture — reducing friction (sludge) and adding timely salience","Cognitive Load Theory — the twelve-step form imposed heavy extraneous load","Implementation intentions — the texts supplied the missing if–then cue","Self-Determination Theory — the simpler process felt less controlling and more autonomy-supportive"],
+ answer:0, why:"Removing friction and adding timely salience are classic choice-architecture moves (Thaler & Sunstein; Castleman & Page's summer-melt studies). No preferences and no knowledge changed — the path to an already-intended action was cleared.",
+ near:"Load and implementation intentions are both partially right, and both are strong distractors: the form was cognitively demanding, and the texts did function as cues. The discriminator is that nobody in this scenario is LEARNING anything — no schema is built, no intention is formed. The intention already existed; only the architecture around it changed."},
+
+{scene:"Two students fail the same statistics exam. One says, 'I'm just not a math person.' The other says, 'I only did massed rereading — I should space my practice and self-test.' Which pairing best captures the difference in their EXPLANATIONS?",
+ options:["Self-efficacy theory and metacognitive monitoring","Learned helplessness and desirable difficulties","Attribution theory (stable/uncontrollable vs. unstable/controllable causes) and mindset theory","Expectancy-Value Theory and self-regulated learning"],
+ answer:2, why:"Weiner: 'not a math person' is internal, stable, uncontrollable — it lowers expectancy and invites helplessness. The strategy explanation is unstable and controllable, preserving expectancy. The contrast maps directly onto Dweck's fixed and growth mindsets.",
+ near:"Every option here is defensible, and that is deliberate — this item tests precision, not recognition. Learned helplessness and desirable difficulties are both genuinely present, but they name where each student is HEADED, not how each explains. The question asks specifically about the explanations, and causal explanation is attribution theory's exact object of study."},
+
 {scene:"A teacher-education program moves methods courses into partner schools, where candidates begin by leading small-group routines alongside mentor teachers before gradually taking on whole-class instruction. Which theory most directly informs this design?",
- options:["Situated learning: legitimate peripheral participation in a community of practice","Multimedia learning: the modality principle","Prospect theory: reference dependence","Chall's stages: reading to learn"],
- answer:0, why:"Lave and Wenger: newcomers learn by sanctioned, low-stakes participation at the edge of authentic practice, moving centripetally toward full participation — precisely the residency logic, with mentors as old-timers granting access."},
+ options:["Cognitive apprenticeship: modeling, coaching, scaffolding, and fading","Situated learning: legitimate peripheral participation in a community of practice","Sociocultural theory: gradual release of responsibility within the ZPD","Deliberate practice: progressively harder tasks with expert feedback"],
+ answer:1, why:"Lave and Wenger: newcomers learn through sanctioned, low-stakes participation at the edge of authentic practice, moving centripetally toward full participation — the residency logic exactly, with mentors as old-timers granting access.",
+ near:"All four describe supported entry into complex skill, and any would be defensible in a paper. The discriminator is the unit of analysis. Cognitive apprenticeship and gradual release describe what an expert does TO a novice; deliberate practice describes designed task difficulty. Only LPP makes the community itself the learning environment and locates the candidate's trajectory as movement within it — which is what 'move the courses into schools' actually changes."},
+
 {scene:"An instructional designer's training video shows dense on-screen text while a narrator reads the identical words aloud over decorative stock footage. Learners perform worse than with a simpler version. Which principles were violated?",
- options:["Redundancy and coherence principles (multimedia learning)","The testing and spacing effects","Scaffolding within the ZPD","Warrant and backing (Toulmin)"],
- answer:0, why:"Mayer: narration plus identical on-screen text overloads the verbal channel (redundancy), and decorative footage adds seductive details that harm learning (coherence). The fix: graphics with narration alone, minus the decoration."},
-{scene:"A veteran teacher in a doctoral seminar reads equity audit data from her own school that contradicts her belief that 'discipline here is colorblind.' Shaken, she begins questioning assumptions she has held for twenty years, discussing them intensely with critical friends, and ultimately redesigns her referral practices. Which theory best describes this arc?",
- options:["Transformative learning: disorienting dilemma → critical reflection → discourse → action","Behaviorism: stimulus generalization","Cognitive load: expertise reversal","Simple View of Reading"],
- answer:0, why:"Mezirow's sequence exactly: a disorienting dilemma (the data), critical premise reflection, rational discourse with peers, and reintegration through action. Festinger's dissonance names the discomfort; Freire would push the outcome toward collective action."},
+ options:["Split-attention and modality principles","Redundancy and coherence principles","The seductive details effect alone","Extraneous load, without any more specific principle"],
+ answer:1, why:"Mayer: narration plus identical on-screen text overloads the verbal channel (redundancy), and decorative footage adds seductive details that harm learning (coherence). The fix is graphics with narration alone, minus the decoration.",
+ near:"This item tests precision INSIDE multimedia learning rather than recognition of the field. Split-attention applies when related material is separated and must be integrated — here the text is not separated but duplicated. Modality would apply if text should have been narrated; it already was. Seductive details is genuinely half the answer (the footage) but misses the duplication, and 'extraneous load' is true of all four options, which is why it is not an answer."},
+
+{scene:"A veteran teacher in a doctoral seminar reads equity audit data from her own school that contradicts her belief that 'discipline here is colorblind.' Shaken, she begins questioning assumptions she has held for twenty years, discusses them intensely with critical friends, and ultimately redesigns her referral practices. Which theory best describes this full arc?",
+ options:["Cognitive dissonance: contradiction produces discomfort that drives resolution","Conceptual change: dissatisfaction with an existing conception plus a more fruitful alternative","Critical pedagogy: the development of critical consciousness","Transformative learning: disorienting dilemma → critical reflection → discourse → action"],
+ answer:3, why:"Mezirow's sequence exactly: a disorienting dilemma (the data), critical premise reflection, rational discourse with peers, and reintegration through changed action.",
+ near:"All three distractors are genuinely operating, which makes this a fair doctoral item. Dissonance names the mechanics of the shaken moment but is agnostic about which resolution route she takes — discrediting the data would also have reduced dissonance. Conceptual change is structurally parallel but developed for scientific concepts, not identity-level frames. Freire would push the endpoint toward collective action rather than one teacher's redesigned practice — a real critique of Mezirow worth knowing, but not a description of this arc."},
+
 {scene:"Students write lab reports that earn high marks in biology but are marked down in chemistry for 'wrong format,' though the writing quality seems identical. Which framework best explains what the students still need to learn?",
- options:["Genre theory: each discipline's report is a distinct genre serving a distinct discourse community","Maslow's hierarchy: unmet safety needs","Flow theory: challenge–skill imbalance","The spacing effect"],
- answer:0, why:"Genres are typified social actions of particular discourse communities (Miller; Swales). 'Good writing' is community-relative: the students have general skills but lack genre knowledge — the purposes, moves, and conventions each discipline's community expects."},
-{scene:"Designing her dissertation study, an EdD candidate must justify why she will use interviews to explore how first-year teachers 'make meaning' of mentoring, rather than running an experiment. Which foundation must she articulate?",
- options:["Her epistemological paradigm — an interpretivist/constructivist stance on what counts as knowledge","Her reinforcement schedule","The coherence principle","Her deck's spacing interval"],
- answer:0, why:"Methodology follows epistemology. Studying constructed meaning presumes knowledge is contextual and co-constructed (interpretivism), warranting qualitative interviews; a positivist stance would warrant controlled measurement. Committees expect this alignment argued explicitly."},
+ options:["Genre theory: each discipline's report is a distinct genre serving a distinct discourse community","Transfer of learning: near transfer failed between adjacent contexts","Situated learning: writing competence is bound to the practice in which it was learned","Threshold concepts: the students have not yet crossed a disciplinary portal"],
+ answer:0, why:"Genres are typified social actions of particular discourse communities (Miller; Swales). 'Good writing' is community-relative: these students have general skills but lack genre knowledge — the purposes, moves, and conventions each discipline's community expects.",
+ near:"Situated learning is nearly the same claim in different vocabulary and is the strongest distractor; the discriminator is that genre theory specifies WHAT is community-bound (the text type and its conventions) rather than competence in general. Transfer correctly describes the failure but treats format as a portable skill that didn't move, when the point is that there was nothing to move — the chemistry genre was never learned."},
+
+{scene:"Designing her dissertation study, an EdD candidate must justify why she will use interviews to explore how first-year teachers 'make meaning' of mentoring, rather than running an experiment. Which foundation is she being asked to articulate?",
+ options:["Her theoretical framework — the body of theory that frames her constructs","Her positionality as a practitioner-researcher in her own setting","Her epistemological paradigm — an interpretivist/constructivist stance on what counts as knowledge","Her research design and sampling strategy"],
+ answer:2, why:"Methodology follows epistemology. Studying constructed meaning presumes knowledge is contextual and co-constructed (interpretivism), warranting qualitative interviews; a positivist stance would warrant controlled measurement. Committees expect this alignment argued explicitly.",
+ near:"These four get conflated constantly in proposals, which is why they are here together. A theoretical framework names which theories frame the constructs — necessary, but it cannot justify a METHOD. Positionality is genuinely required for insider research but answers 'who is asking,' not 'what counts as knowing.' Design and sampling are downstream consequences of the paradigm, not its justification."},
+
 {scene:"A high school revises its American history course so students corroborate conflicting primary sources about the same strike, asking who wrote each account, when, and why — instead of memorizing the textbook narrative. Which shift does this represent?",
- options:["From an 'encyclopedia' epistemology toward disciplinary historical thinking (sourcing, contextualization, corroboration)","From aesthetic to efferent reading","From germane to extraneous load","From relatedness to autonomy"],
- answer:0, why:"Wineburg's heuristics define the move: treating texts as evidence authored by positioned humans rather than as neutral information. It is also an epistemological shift — from certain, given knowledge to evaluativist judgment among competing accounts."},
+ options:["Toward inquiry-based learning replacing direct instruction","Toward disciplinary historical thinking — sourcing, contextualization, corroboration — and an epistemological shift from received to evaluated knowledge","Toward critical pedagogy: reading the word and the world","Toward expert schema organization: chunking historical knowledge into larger units"],
+ answer:1, why:"Wineburg's heuristics define the move: treating texts as evidence authored by positioned humans rather than as neutral information. It is simultaneously an epistemological shift — from certain, given knowledge toward evaluativist judgment among competing accounts.",
+ near:"'Inquiry-based learning' is the answer most students pick and the least precise: inquiry describes the format, not the specific cognitive heuristics of the discipline, and plenty of inquiry lessons never source anything. Critical pedagogy fits the labor-strike content but names a political project rather than a method of historical reasoning. Expert schema organization is about how knowledge is stored, not how evidence is weighed."},
+
 {scene:"Students write strong Toulmin-style arguments in English class, but their posts in a civics forum and their science conclusions show none of that structure. Their teacher starts having them abstract the claim–evidence–warrant principle explicitly, then forecast where else they will use it — and assigns argument tasks in three different classes. Which framework names her two moves?",
- options:["Transfer of learning: bridging (mindful abstraction) and hugging (practicing near the target contexts)","Cognitive dissonance: insufficient justification","Maslow: deficiency needs before growth needs","The redundancy principle"],
- answer:0, why:"Perkins and Salomon's high-road/low-road account prescribes exactly this pair: bridging builds mindful abstraction of the principle for far transfer, while hugging makes practice resemble the civic and scientific target contexts for near transfer. This is the core of a problem of practice about transfer of argumentation across writing contexts."},
+ options:["Situated learning: the argument practice was bound to English class","Interleaving and varied practice across contexts","Metacognition: making the strategy explicit for self-regulated use","Transfer of learning: bridging (mindful abstraction) and hugging (practicing near the target contexts)"],
+ answer:3, why:"Perkins and Salomon's high-road/low-road account prescribes exactly this pair: bridging builds mindful abstraction of the principle for far transfer, while hugging makes practice resemble the civic and scientific target contexts for near transfer.",
+ near:"Situated learning is the best DIAGNOSIS of the problem here and a legitimate answer to a different question — but it names why the failure happened, not the two moves she made. Interleaving describes the multi-class assignment but not the explicit abstraction; metacognition describes the abstraction but not the varied contexts. Only bridging-and-hugging names both, as a matched pair."},
+
 {scene:"An EdD candidate pilots a writing intervention in her own school: she designs it from teacher-empathy interviews, runs a cycle, analyzes student argument samples and engagement data, revises the design, and runs it again — documenting how each revision tests her framework's conjectures. Which methodological pairing is she enacting?",
- options:["Human-centered design supplying the design moves; design-based research supplying the iterative research architecture","Grounded theory and a randomized controlled trial","Behaviorism and classical test theory","Ethnography and meta-analysis"],
- answer:0, why:"Empathy research and prototyping are HCD; studying theoretically motivated design conjectures through iterative enact–analyze–redesign cycles in an authentic setting is DBR (Brown; Cobb et al.). Because she is studying her own context, practitioner-inquiry positionality work belongs in her methods chapter too."},
-{scene:"A biology teacher replaces end-of-unit summary sheets with weekly explanatory paragraphs in which students must justify a claim from lab evidence. Content test scores rise. Which theory predicted this, and through what mechanism?",
- options:["Writing to learn: composing is epistemic — knowledge-transforming writing restructures content understanding","Prospect theory: loss framing increases effort","Multiple intelligences: matching tasks to learner types","Connectivism: adding network nodes"],
- answer:0, why:"Emig's writing-as-learning thesis, supported meta-analytically (Bangert-Drowns et al.), holds that composing explanatory text forces selection, organization, and integration of content — knowledge-transforming rather than knowledge-telling. Retrieval practice (testing effect) is a complementary mechanism at work here too."},
-{scene:"A doctoral student keeps postponing her literature review — she knows exactly what to do but can't seem to start. She writes: 'When I sit down with coffee at 8 on Saturday, I will open the matrix and summarize ONE article,' sets a visible 25-minute timer, and arranges to co-work on video with a classmate. Which frameworks is she applying?",
- options:["Implementation intentions (if–then planning) plus executive-function externalization at the point of performance","The redundancy principle and schema activation","Banking education and problem-posing","Chall's Stage 3 and the fourth-grade slump"],
- answer:0, why:"The if–then plan (Gollwitzer) delegates initiation to a concrete cue instead of willpower, and the visible timer plus co-working externalize time and accountability exactly where the work happens — Barkley's point of performance. Shrinking the task to one article is an initiation ramp: the bottleneck is starting, not ability."}
+ options:["Action research supplying the cycle; practitioner inquiry supplying the insider stance","Improvement science: PDSA cycles inside a networked improvement community","Human-centered design supplying the design moves; design-based research supplying the iterative research architecture","Formative experiment methodology, with grounded theory analysis of the interviews"],
+ answer:2, why:"Empathy research and prototyping are HCD; studying theoretically motivated design conjectures through iterative enact–analyze–redesign cycles in an authentic setting is DBR (Brown; Cobb et al.). Because she is studying her own context, practitioner-inquiry positionality work also belongs in her methods chapter.",
+ near:"These are real methodological neighbors that doctoral committees expect candidates to distinguish. Action research and practitioner inquiry are genuinely present but do not require the theory-testing conjectures the scenario specifies. Improvement science shares the iterative shape but aims at system reliability rather than at generating design principles. The decisive words in the scenario are 'tests her framework's conjectures' — that is DBR's defining commitment."},
+
+{scene:"A biology teacher replaces end-of-unit summary sheets with weekly explanatory paragraphs in which students must justify a claim from lab evidence. Content test scores rise. Which theory most fully explains the gain?",
+ options:["Retrieval practice: weekly writing functions as repeated low-stakes testing","Writing to learn: composing is epistemic — knowledge-transforming writing restructures understanding","Self-explanation effect: generating explanations while studying deepens comprehension","Argumentation instruction: claim–evidence–reasoning improves both explanation and content learning"],
+ answer:1, why:"Writing-to-learn research distinguishes knowledge-TELLING (summary sheets) from knowledge-TRANSFORMING (justifying a claim). The transformation demand is what restructures understanding — which is why replacing summaries with argument changed the outcome while the amount of writing did not.",
+ near:"This is the hardest item in the set, because all four mechanisms are genuinely operating and all four are defensible. The discriminating detail is what CHANGED: students were already writing weekly. Retrieval and self-explanation would have been present in the summary sheets too. What the swap introduced was the demand to transform knowledge into a warranted claim — writing-to-learn's central distinction, with CER as the instructional vehicle rather than the explanation."},
+
+{scene:"A doctoral student keeps postponing her literature review — she knows exactly what to do but cannot get started, and each delay makes the task feel larger. Which pairing best addresses the actual failure point?",
+ options:["Self-efficacy: rebuild through mastery experiences on smaller writing tasks","Expectancy-Value Theory: the cost term has grown too high relative to value","Self-regulated learning: a forethought-phase goal-setting and planning deficit","Implementation intentions (if–then planning) plus externalizing executive function at the point of performance"],
+ answer:3, why:"The gap is not knowledge, motivation, or planning in the abstract — she knows what to do. Gollwitzer's implementation intentions close intention–action gaps by binding a specific cue to a specific action ('when I sit down Tuesday at 9, I open the matrix and code one article'), and Barkley's point-of-performance principle says the supports must exist where and when the action occurs, not in advance.",
+ near:"Every distractor is a real theory of procrastination and each would be right about a different student. Self-efficacy fits someone who doubts she CAN; the scenario says she knows how. Expectancy-value's cost term is the strongest rival and worth arguing. SRL's forethought phase is closest of all — but planning is precisely what she has already done. What is missing is the cue-bound trigger and the external scaffold at the moment of action."}
 ];
 
 /* =============== APP =============== */
@@ -2159,15 +2354,25 @@ const MISC={
 };
 
 /* --- nav --- */
-document.querySelectorAll('#nav button').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('#nav button').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');
-  ['library','cards','compare','scenarios','index'].forEach(t=>$('#tab-'+t).classList.toggle('hidden', t!==b.dataset.tab));
-  currentTab=b.dataset.tab;
-  if(currentTab==='cards') buildDeck();
-  if(currentTab==='compare') renderCompare();
-  if(currentTab==='index') renderIndex();
-}));
+/* One switcher used by the nav AND the hash router, so both stay in sync. */
+function goTab(name, opts){
+  opts=opts||{};
+  document.querySelectorAll('#nav button').forEach(x=>{
+    const on = x.dataset.tab===name;
+    x.classList.toggle('active', on);
+    if(on){ x.setAttribute('aria-current','page'); } else { x.removeAttribute('aria-current'); }
+  });
+  ['library','cards','compare','scenarios','framework','index'].forEach(t=>$('#tab-'+t).classList.toggle('hidden', t!==name));
+  currentTab=name;
+  if(name==='cards') buildDeck();
+  if(name==='compare') renderCompare();
+  if(name==='index') renderIndex();
+  if(name==='framework') renderFramework();
+  const TT={library:'Library',cards:'Flashcards',compare:'Compare',scenarios:'Scenarios',framework:'My Framework',index:'Master Index'};
+  if(!opts.silent) document.title=(TT[name]||'The Theory Lab')+' — The Theory Lab';
+  if(!opts.fromHash) location.hash='#'+name;
+}
+document.querySelectorAll('#nav button').forEach(b=>b.addEventListener('click',()=>goTab(b.dataset.tab)));
 
 /* --- library --- */
 function renderChips(){
@@ -2240,19 +2445,132 @@ function showStub(cat,si){
       <p style="font-size:.94rem;">This theory is mapped but not yet built out. To add the full entry — origins, core claims, key constructs, applications, critiques, and APA references — ask Claude: <b>"Build out ${esc(s[0])}"</b>, then upload the updated file to GitHub. It will join the flashcards and comparisons automatically.</p>
     </section>
   </div>`;
-  d.querySelector('.backbtn').addEventListener('click',renderList);
+
+  const hh=d.querySelector('h2'); if(hh) hh.focus({preventScroll:true});
+
+  d.querySelector('.backbtn').addEventListener('click',()=>{
+    if(location.hash.indexOf('#t/')===0){ history.replaceState(null,'','#library'); document.title='The Theory Lab — EdD Study Companion'; }
+    renderList();
+  });
   window.scrollTo({top:0});
+}
+/* v23: references may be a plain string or {r, url}. Every reference gets a
+   way to reach the source — a verified link where we have one, otherwise a
+   Google Scholar search built from the citation itself (never a guessed DOI). */
+function refText(r){ return (typeof r==='string') ? r : (r && r.r) || ''; }
+function refLine(r){
+  const txt = refText(r);
+  const url = (typeof r==='object' && r && r.url) ? r.url : null;
+  const plain = txt.replace(/<[^>]*>/g,'');
+  const scholar = 'https://scholar.google.com/scholar?q=' + encodeURIComponent(plain.slice(0,300));
+  const label = url ? 'source ↗' : 'find it ↗';
+  return '<li>'+txt+' <a class="reflink" href="'+(url||scholar)+'" target="_blank" rel="noopener">'+label+'</a></li>';
+}
+
+/* ===== MY FRAMEWORK (v24) =========================================
+   Lets a doctoral student tag each theory by the role it plays in their
+   study, add a private rationale note, and export the whole map with APA
+   references. Everything is stored in this browser only. ============== */
+const FW_ROLES = [
+  ['framework','Theoretical framework'],
+  ['method','Methodology'],
+  ['lit','Related literature'],
+  ['considered','Considered & set aside']
+];
+function fwAll(){ return store.get('framework', {}); }
+function fwGet(id){ return fwAll()[id] || null; }
+function fwSet(id, role){
+  const m = fwAll();
+  if(!role){ delete m[id]; } else { m[id] = Object.assign({}, m[id]||{}, {role:role}); }
+  store.set('framework', m);
+}
+function fwNote(id, txt){
+  const m = fwAll();
+  if(!m[id]) m[id] = {role:'lit'};
+  m[id].note = txt; store.set('framework', m);
+}
+function fwControls(t){
+  const cur = fwGet(t.id);
+  const role = cur && cur.role;
+  return '<div class="fwlabel">My dissertation map</div>'
+    + '<div class="fwrow">'
+    + FW_ROLES.map(([k,l])=>'<button class="fwbtn fw-'+k+(role===k?' on':'')+'" data-fw="'+k+'">'+l+'</button>').join('')
+    + (role?'<button class="fwbtn" data-fw="">Clear</button>':'')
+    + '</div>'
+    + (role?'<textarea class="fwnote" data-fwnote="1" placeholder="Why this theory earns a place in your study — one or two sentences you can lift into a chapter.">'+esc((cur&&cur.note)||'')+'</textarea>':'')
+    + '<div class="note" style="font-size:.72rem;color:#6B7280;">Saved on this device only.</div>';
+}
+function renderFramework(){
+  const area=$('#fw-area');
+  const m=fwAll();
+  const ids=Object.keys(m);
+  if(!ids.length){
+    area.innerHTML='<div class="detail"><h2 tabindex="-1">My Framework</h2>'
+      +'<p style="font-size:.96rem;">Open any theory and tag it by the role it plays in your study — theoretical framework, methodology, related literature, or considered and set aside. Tagged theories gather here, with your notes, ready to export with APA references.</p>'
+      +'<p class="note" style="font-size:.8rem;">Recording what you considered <i>and rejected</i> is not busywork: committees ask why you chose this lens over its neighbors, and the answer is much easier to write down now than to reconstruct later.</p>'
+      +'<p class="note" style="font-size:.8rem;">Everything is stored in this browser only — nothing is uploaded, and clearing browser data clears it.</p></div>';
+    return;
+  }
+  let html='<div class="detail"><h2 tabindex="-1">My Framework</h2>'
+    +'<p class="note" style="font-size:.8rem;">'+ids.length+' theories mapped. Stored on this device only.</p>'
+    +'<div class="fwrow"><button class="fwbtn" id="fwcopy">Copy the whole map (with references)</button>'
+    +'<button class="fwbtn" id="fwcopyrefs">Copy references only (APA)</button></div>';
+  FW_ROLES.forEach(([k,l])=>{
+    const items=ids.filter(id=>m[id].role===k).map(id=>byId(id)).filter(Boolean);
+    if(!items.length) return;
+    html+='<div class="fwgroup"><h3>'+l+' <span style="opacity:.6;font-weight:400;">('+items.length+')</span></h3>';
+    items.forEach(t=>{
+      html+='<div class="fwitem"><div><b>'+esc(t.name)+'</b>'
+        +'<div class="note" style="font-size:.75rem;">'+esc(t.theorists||'')+'</div>'
+        +((m[t.id].note)?'<div style="font-size:.85rem;margin-top:5px;">'+esc(m[t.id].note)+'</div>':'')
+        +'</div><button class="rm" data-fwrm="'+t.id+'">remove</button></div>';
+    });
+    html+='</div>';
+  });
+  html+='</div>';
+  area.innerHTML=html;
+  const hh=area.querySelector('h2'); if(hh) hh.focus({preventScroll:true});
+  area.querySelectorAll('[data-fwrm]').forEach(b=>b.addEventListener('click',()=>{ fwSet(b.dataset.fwrm,null); renderFramework(); }));
+  const mk=(withNotes)=>{
+    let out='MY DISSERTATION FRAMEWORK MAP\n\n';
+    FW_ROLES.forEach(([k,l])=>{
+      const items=ids.filter(id=>m[id].role===k).map(id=>byId(id)).filter(Boolean);
+      if(!items.length) return;
+      out+=l.toUpperCase()+'\n';
+      items.forEach(t=>{
+        out+='\n• '+t.name+' ('+(t.theorists||'')+')';
+        if(withNotes && m[t.id].note) out+='\n  Rationale: '+m[t.id].note;
+        out+='\n  References:\n';
+        (t.refs||[]).forEach(r=>{ out+='    '+refText(r).replace(/<[^>]*>/g,'')+'\n'; });
+      });
+      out+='\n';
+    });
+    return out;
+  };
+  const mkRefs=()=>{
+    const seen=new Set(); const lines=[];
+    ids.map(id=>byId(id)).filter(Boolean).forEach(t=>(t.refs||[]).forEach(r=>{
+      const s=refText(r).replace(/<[^>]*>/g,''); if(!seen.has(s)){seen.add(s);lines.push(s);}
+    }));
+    return lines.sort().join('\n\n');
+  };
+  const btn1=$('#fwcopy'), btn2=$('#fwcopyrefs');
+  if(btn1) btn1.addEventListener('click',()=>{ if(navigator.clipboard) navigator.clipboard.writeText(mk(true)).then(()=>{btn1.textContent='✓ Copied';btn1.classList.add('on');}).catch(()=>{}); });
+  if(btn2) btn2.addEventListener('click',()=>{ if(navigator.clipboard) navigator.clipboard.writeText(mkRefs()).then(()=>{btn2.textContent='✓ Copied — '+mkRefs().split('\n\n').length+' unique references';btn2.classList.add('on');}).catch(()=>{}); });
 }
 function sec(title,inner){ return inner?`<section><h4>${title}</h4>${inner}</section>`:''; }
 function list(items){ return items&&items.length?'<ul>'+items.map(i=>`<li>${esc(i)}</li>`).join('')+'</ul>':''; }
-function showDetail(id){
+function showDetail(id, opts){
+  opts=opts||{};
   const t=byId(id); if(!t) return;
+  if(!opts.fromHash) location.hash='#t/'+id;
+  document.title=t.name+' — The Theory Lab';
   $('#list').classList.add('hidden'); $('.toolbar').classList.add('hidden'); $('#chips').classList.add('hidden'); $('#vtog').classList.add('hidden');
   const d=$('#detail'); d.classList.remove('hidden');
   d.innerHTML=`<div class="detail">
     <button class="backbtn">← All theories</button>
     <div class="disc" style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:700;">${esc(t.discipline)}</div>
-    <h2>${esc(t.name)}</h2>
+    <h2 tabindex="-1">${esc(t.name)}</h2>
     <div class="who">${esc(t.theorists)}</div>
     <p style="font-size:.98rem;"><em>${esc(t.tagline)}</em></p>
     ${sec('What problem does this theory help explain?', t.problem?`<p style="font-size:.94rem;">${esc(t.problem)}</p>${t.asks&&t.asks.length?'<div style="margin-top:8px;"><b style="font-size:.85rem;">The questions it tries to answer:</b>'+list(t.asks)+'</div>':''}`:'')}
@@ -2267,10 +2585,39 @@ function showDetail(id){
     ${t.competing&&t.competing.length?sec('Competing explanations', t.competing.map(c=>`<div class="construct" style="margin-bottom:12px;"><b>Same situation, different lens — ${esc(c.scenario)}</b><br><b style="color:#123c39;">This theory says:</b> ${esc(c.thisView)}<br><b style="color:#7a3d00;">${esc(c.other)} says:</b> ${esc(c.otherView)}<br><b>Where they agree:</b> ${esc(c.agree)}</div>`).join('')):''}
     ${t.research?sec('Research implications', `${t.research.questions&&t.research.questions.length?'<div style="margin-bottom:8px;"><b style="font-size:.88rem;">Common research questions</b>'+list(t.research.questions)+'</div>':''}${t.research.methods?`<div class="construct"><b>Typical methodologies.</b> ${esc(t.research.methods)}</div>`:''}${t.research.variables?`<div class="construct"><b>Common variables & measures.</b> ${esc(t.research.variables)}</div>`:''}${t.research.support?`<div class="construct"><b>Strength of empirical support.</b> ${esc(t.research.support)}</div>`:''}`):''}
     ${t.constellation?sec('Theory constellation', [['builds','Builds upon'],['complements','Complements'],['contrasts','Contrasts with'],['pairs','Frequently used together']].map(([k,label])=>{const row=(t.constellation[k]||[]).map(r=>{const rt=byId(r); return rt?`<button class="rellink" data-id="${rt.id}">${esc(rt.name)}</button>`:'';}).join(''); return row?`<div style="margin-bottom:8px;"><b style="font-size:.82rem;color:var(--muted);">${label}</b><div class="relrow" style="margin-top:4px;">${row}</div></div>`:'';}).join('')):sec('Related theories', (t.related||[]).map(r=>{const rt=byId(r); return rt?`<button class="rellink" data-id="${rt.id}">${esc(rt.name)}</button>`:'';}).join('')? `<div class="relrow">${(t.related||[]).map(r=>{const rt=byId(r); return rt?`<button class="rellink" data-id="${rt.id}">${esc(rt.name)}</button>`:'';}).join('')}</div>`:'')}
-    ${sec('Seminal references (APA)', t.refs&&t.refs.length?'<ul class="refs">'+t.refs.map(r=>`<li>${esc(r)}</li>`).join('')+'</ul>':'')}
+    ${fwControls(t)}
+    ${sec('Seminal references (APA)', t.refs&&t.refs.length
+      ? '<ul class="refs">'+t.refs.map(r=>refLine(r)).join('')+'</ul>'
+        +'<button class="citebtn" id="copyrefs">Copy all references (APA)</button>'
+        +'<button class="citebtn" id="copylink">Copy link to this theory</button>'
+      : '')}
     ${t.reflect&&t.reflect.length?sec('Reflect before you decide', '<ul>'+t.reflect.map(r=>`<li>${esc(r)}</li>`).join('')+'</ul>'):''}
   </div>`;
-  d.querySelector('.backbtn').addEventListener('click',renderList);
+  /* v23: focus management + citation helpers */
+  const hh=d.querySelector('h2'); if(hh) hh.focus({preventScroll:true});
+  d.querySelectorAll('[data-fw]').forEach(b=>b.addEventListener('click',()=>{
+    fwSet(t.id, b.dataset.fw || null);
+    showDetail(t.id,{fromHash:true});
+  }));
+  const fn=d.querySelector('[data-fwnote]');
+  if(fn) fn.addEventListener('input',()=>fwNote(t.id, fn.value));
+  const cr=d.querySelector('#copyrefs');
+  if(cr) cr.addEventListener('click',()=>{
+    const txt=(t.refs||[]).map(refText).map(s=>s.replace(/<[^>]*>/g,'')).join('\n\n');
+    const done=()=>{cr.textContent='✓ Copied — paste into your reference list';cr.classList.add('done');};
+    if(navigator.clipboard){navigator.clipboard.writeText(txt).then(done).catch(()=>{});}
+  });
+  const cl=d.querySelector('#copylink');
+  if(cl) cl.addEventListener('click',()=>{
+    const url=location.href.split('#')[0]+'#t/'+t.id;
+    const done=()=>{cl.textContent='✓ Link copied';cl.classList.add('done');};
+    if(navigator.share){navigator.share({title:t.name,url:url}).catch(()=>{});}
+    else if(navigator.clipboard){navigator.clipboard.writeText(url).then(done).catch(()=>{});}
+  });
+  d.querySelector('.backbtn').addEventListener('click',()=>{
+    if(location.hash.indexOf('#t/')===0){ history.replaceState(null,'','#library'); document.title='The Theory Lab — EdD Study Companion'; }
+    renderList();
+  });
   d.querySelectorAll('.rellink').forEach(b=>b.addEventListener('click',()=>showDetail(b.dataset.id)));
   window.scrollTo({top:0});
 }
@@ -2347,17 +2694,22 @@ function renderCompare(){
 let sIdx=0, sScore=0, sAnswered=0;
 function renderScenario(){
   const area=$('#scen-area');
+  if(!window._scenOrder || window._scenOrder.length!==SCENARIOS.length) window._scenOrder=shuffle(SCENARIOS.map((_,i)=>i));
   if(sIdx>=SCENARIOS.length){
     const best=Math.max(sScore,store.get('scenBest',0)); store.set('scenBest',best);
     area.innerHTML=`<div class="scen"><div class="stext">Round complete: <b>${sScore} / ${SCENARIOS.length}</b> correct. Personal best: <b>${best}</b>.</div>
-    <div class="scen-nav"><span class="scorepill">Repetition builds transfer — run it again.</span><button onclick="sIdx=0;sScore=0;sAnswered=0;renderScenario()">Restart</button></div></div>`;
+    <div class="scen-nav"><span class="scorepill">Repetition builds transfer — run it again.</span><button onclick="sIdx=0;sScore=0;sAnswered=0;window._scenOrder=null;renderScenario()">Restart</button></div></div>`;
     return;
   }
-  const s=SCENARIOS[sIdx];
+  const s=SCENARIOS[window._scenOrder[sIdx]];
+  /* Randomize option order every time a scenario is shown, so answer position
+     never carries information and repeat rounds stay honest. data-i keeps the
+     ORIGINAL index, so scoring against s.answer is unchanged. */
+  const sOrder=shuffle(s.options.map((_,i)=>i));
   area.innerHTML=`<div class="scen">
     <div class="scorepill" style="margin-bottom:8px;">Scenario ${sIdx+1} of ${SCENARIOS.length} · Score ${sScore}</div>
     <div class="stext">${esc(s.scene)}</div>
-    ${s.options.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}
+    ${sOrder.map(i=>`<button class="opt" data-i="${i}">${esc(s.options[i])}</button>`).join('')}
     <div id="why"></div>
     <div class="scen-nav"><span></span><button id="nextS" disabled>Next →</button></div>
   </div>`;
@@ -2367,7 +2719,8 @@ function renderScenario(){
     const i=+btn.dataset.i;
     if(i===s.answer){btn.classList.add('correct'); sScore++;}
     else{btn.classList.add('wrong'); area.querySelector(`.opt[data-i="${s.answer}"]`).classList.add('correct');}
-    $('#why').innerHTML=`<div class="why"><b>Why:</b> ${esc(s.why)}</div>`;
+    $('#why').innerHTML=`<div class="why"><b>Why:</b> ${esc(s.why)}</div>`
+      + (s.near?`<div class="why" style="margin-top:8px;"><b>Why not the others:</b> ${esc(s.near)}</div>`:'');
     $('#nextS').disabled=false;
   }));
   $('#nextS').addEventListener('click',()=>{sIdx++;renderScenario();});
@@ -2496,7 +2849,6 @@ const STUBS = {
  ["Ethnography","Sustained fieldwork interpreting culture from within."],
  ["Narrative Inquiry (Clandinin & Connelly)","Experience understood and researched as lived and told stories."],
  ["Mixed Methods Design (Creswell, Teddlie)","Integrating quantitative and qualitative strands by design logic."],
- ["Improvement Science (Bryk)","Networked, iterative PDSA cycles for educational improvement — cousin to DBR."],
  ["Validity Frameworks (Messick, Kane)","Unified construct validity and argument-based validation."],
  ["Phenomenological Methods (Moustakas, van Manen)","Researching the essence of lived experience."]],
 "Critical & Social Theory": [
@@ -2542,7 +2894,6 @@ const STUBS = {
  ["Sociolinguistics & Language Variation (Labov)","Dialect difference is not deficit — the linguistic legitimacy of all varieties."],
  ["Usage-Based Acquisition (Tomasello)","Language learned from use via intention-reading and pattern-finding, not innate grammar."]],
 "Assessment & Evaluation": [
- ["Formative Assessment (Black & Wiliam)","Inside the black box: five strategies that move learning while it's happening."],
  ["Feedback Theory (Hattie & Timperley)","Feed up, feed back, feed forward — and why praise is the weakest level."],
  ["Validity Argument (Messick; Kane)","Validity as an argument about interpretations and uses, not a property of tests."],
  ["Classical Test Theory & IRT","Reliability, measurement error, and item response modeling — the psychometric backbone."],
@@ -2574,15 +2925,34 @@ function renderIndex(){
   });
   area.innerHTML=html;
   area.querySelectorAll('.idx-item.built').forEach(b=>b.addEventListener('click',()=>{
-    document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('active', x.dataset.tab==='library'));
-    ['library','cards','compare','scenarios','index'].forEach(t=>$('#tab-'+t).classList.toggle('hidden', t!=='library'));
-    currentTab='library';
+    goTab('library',{silent:true,fromHash:true});
     showDetail(b.dataset.id);
   }));
 }
 
+/* --- hash router (v23) -------------------------------------------------
+   #t/<theory-id>  → opens that theory directly (shareable deep link)
+   #library #cards #compare #scenarios #index → opens that tab
+   Enables: linking a cohort straight to one theory, browser back/forward,
+   and precise cross-links from The Instructional Studio.                */
+function routeFromHash(){
+  const raw=(location.hash||'').slice(1);
+  if(!raw) return false;
+  if(raw.indexOf('t/')===0){
+    const id=raw.slice(2);
+    if(byId(id)){ goTab('library',{silent:true,fromHash:true}); showDetail(id,{fromHash:true}); return true; }
+    return false;
+  }
+  if(['library','cards','compare','scenarios','framework','index'].indexOf(raw)>=0){
+    goTab(raw,{fromHash:true}); return true;
+  }
+  return false;
+}
+window.addEventListener('hashchange',()=>{ if(!routeFromHash()) goTab('library',{fromHash:true}); });
+
 /* --- init --- */
 renderChips(); renderList(); fillCmp(); renderScenario();
+routeFromHash();
 </script>
 </body>
 </html>
