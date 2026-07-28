@@ -42,6 +42,11 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   .chipbar{display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; margin-bottom:10px; -webkit-overflow-scrolling:touch;}
   .chip{flex:0 0 auto; font-family:'Helvetica Neue',Arial,sans-serif; font-size:.78rem; padding:6px 12px; border-radius:999px; border:1px solid var(--line); background:var(--card); cursor:pointer; color:var(--ink);}
   .chip.active{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .chipbar.wrap{flex-wrap:wrap; overflow-x:visible;}
+  .chip .n{font-size:.7rem; opacity:.62; margin-left:5px; font-variant-numeric:tabular-nums;}
+  .chip.active .n{opacity:.85;}
+  .catnote{font-family:'Helvetica Neue',Arial,sans-serif; font-size:.76rem; color:var(--muted); margin:-4px 0 12px; line-height:1.5;}
+  .catnote b{color:var(--ink); font-weight:600;}
   .tcard{background:var(--card); border:1px solid var(--line); border-radius:var(--r); padding:14px 16px; margin-bottom:10px; box-shadow:var(--shadow); cursor:pointer;}
   .tcard h3{font-size:1.05rem;}
   .tcard .disc{font-family:'Helvetica Neue',Arial,sans-serif; font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; color:var(--accent); font-weight:700;}
@@ -55,6 +60,17 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   .detail .who{color:var(--muted); font-style:italic; margin:2px 0 10px;}
   .detail section{margin-top:18px;}
   .detail h4{font-family:'Helvetica Neue',Arial,sans-serif; font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; color:var(--accent); margin-bottom:6px; border-bottom:1px solid var(--line); padding-bottom:4px;}
+  /* Collapsible entry sections (v25) */
+  details.sec{border-bottom:1px solid var(--line);}
+  details.sec > summary{list-style:none; cursor:pointer; padding:13px 26px 13px 0; position:relative; min-height:36px;}
+  details.sec > summary::-webkit-details-marker{display:none;}
+  details.sec > summary h4{border-bottom:none; padding-bottom:0; margin:0; font-size:.78rem; letter-spacing:.06em; text-transform:none; color:var(--ink); font-weight:700;}
+  details.sec > summary::after{content:'+'; position:absolute; right:2px; top:50%; transform:translateY(-50%); font-family:'Helvetica Neue',Arial,sans-serif; font-size:1.15rem; line-height:1; color:var(--accent); font-weight:400;}
+  details.sec[open] > summary::after{content:'–';}
+  details.sec[open] > summary h4{color:var(--accent);}
+  details.sec > .secbody{padding:2px 0 16px;}
+  details.sec > summary:focus-visible{outline:3px solid var(--accent); outline-offset:2px; border-radius:6px;}
+  .expandbtn{font-family:'Helvetica Neue',Arial,sans-serif; font-size:.78rem; padding:8px 14px; min-height:36px; margin:12px 0 4px; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer;}
   .detail ul{padding-left:20px;}
   .detail li{margin-bottom:6px; font-size:.94rem;}
   .construct{margin-bottom:8px; font-size:.94rem;}
@@ -71,7 +87,9 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
     border:1px solid var(--line,#E7E3DA); background:#fff; cursor:pointer; margin:6px 6px 0 0;}
   .citebtn.done{background:#E4F0EE; border-color:#17B3A6; color:#14524D;}
   @media print{
-    #nav, .toolbar, .backbtn, .skiplink, .citebtn, #chips, #vtog{display:none !important;}
+    #nav, .toolbar, .backbtn, .skiplink, .citebtn, #chips, #vtog, #catnote, .expandbtn{display:none !important;}
+    details.sec > .secbody{display:block !important;}
+    details.sec > summary::after{display:none;}
     body{background:#fff;} .detail{border:none; padding:0;}
     .hidden{display:block !important;}
   }
@@ -141,6 +159,11 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   .idx-item.stub b{color:var(--ink); font-weight:normal;}
   .qlead{background:var(--accent-soft); border-radius:var(--r); padding:14px 16px; margin-bottom:12px; font-size:.92rem; color:#12403c; grid-column:1/-1;}
   .qlead b{font-size:1.02rem;}
+  .qlead .qback{display:block; width:fit-content; margin:0 0 10px; font-family:'Helvetica Neue',Arial,sans-serif; font-size:.78rem; padding:6px 12px; min-height:36px; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer;}
+  .tcard.qpick h3{font-size:1.06rem; line-height:1.35; margin-top:2px;}
+  .tcard.qpick .qcount{font-family:'Helvetica Neue',Arial,sans-serif; font-size:.75rem; color:var(--accent); font-weight:700; margin-top:8px;}
+  .chipbar:empty{display:none;}
+  .catnote:empty{display:none;}
   .tcard.stub2{border-style:dashed; background:#fbfaf5; box-shadow:none;}
   .tcard.stub2 h3{color:#4b5563; font-size:.98rem;}
   .tcard.stub2 p{color:var(--muted);}
@@ -171,8 +194,9 @@ if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   <!-- LIBRARY -->
   <div id="tab-library">
     <div class="toolbar"><input type="search" id="q" placeholder="Search theories, theorists, constructs…"></div>
-    <div class="chipbar" id="vtog"></div>
+    <div class="chipbar wrap" id="vtog"></div>
     <div class="chipbar" id="chips"></div>
+    <div class="catnote" id="catnote"></div>
     <div id="list" class="grid"></div>
     <div id="detail" class="hidden"></div>
   </div>
@@ -2276,7 +2300,34 @@ const $=s=>document.querySelector(s);
 const byId=id=>THEORIES.find(t=>t.id===id);
 const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
 const DISCS=[...new Set(THEORIES.map(t=>t.discipline))];
-let activeDisc='All', currentTab='library', viewMode='subject', activeQ=0;
+/* ===== Library category groups (v25) =============================
+   23 subject chips meant nearly eight screens of sideways scrolling on a
+   phone, and six of them were stub-only categories with nothing built behind
+   them. Six groups now cover every category, built or planned. Nothing is
+   lost: the precise discipline still appears on every card, in the group
+   subtitle, and in the Master Index. Any discipline not listed below is
+   appended to the last group automatically, so a new one cannot vanish. */
+const CAT_GROUPS=[
+  ['How people learn',      ['Learning Theory','Psychology','Learning & ADHD']],
+  ['Teaching & curriculum', ['Education & Pedagogy','Assessment & Evaluation','Technology & Digital Learning']],
+  ['Literacy & language',   ['Literacy','Writing','Literary Theory','Language & Multilingualism']],
+  ['Subject teaching',      ['Mathematics Ed','Science Ed','Historical Thinking']],
+  ['Society & systems',     ['Sociology','Behavioral Economics','Critical & Social Theory','Leadership & Organizations','Policy & Political Economy']],
+  ['Inquiry & method',      ['Research & Methodology','Logic & Argumentation','Philosophy']]
+];
+(function(){                      /* safety net: never lose a discipline */
+  const covered=new Set(CAT_GROUPS.flatMap(g=>g[1]));
+  DISCS.forEach(d=>{ if(!covered.has(d)) CAT_GROUPS[CAT_GROUPS.length-1][1].push(d); });
+})();
+function groupCats(label){
+  if(label==='All') return ALLCATS;
+  const g=CAT_GROUPS.find(x=>x[0]===label);
+  return g?g[1]:[label];
+}
+function groupCount(label){
+  return THEORIES.filter(t=>groupCats(label).indexOf(t.discipline)>=0).length;
+}
+let activeDisc='All', currentTab='library', viewMode='subject', activeQ=null;
 
 /* Teacher-facing clusters: same theories, organized by the questions teachers actually ask. */
 const TEACH=[
@@ -2377,14 +2428,40 @@ document.querySelectorAll('#nav button').forEach(b=>b.addEventListener('click',(
 /* --- library --- */
 function renderChips(){
   $('#vtog').innerHTML=[['subject','📚 By subject'],['question','🧑‍🏫 By teaching question'],['problem','🩺 By classroom problem']].map(([v,l])=>`<button class="chip ${viewMode===v?'active':''}" data-v="${v}">${l}</button>`).join('');
-  document.querySelectorAll('#vtog .chip').forEach(c=>c.addEventListener('click',()=>{viewMode=c.dataset.v; activeQ=0; renderChips(); renderList();}));
+  document.querySelectorAll('#vtog .chip').forEach(c=>c.addEventListener('click',()=>{viewMode=c.dataset.v; activeQ=null; renderChips(); renderList();}));
   if(viewMode==='subject'){
-    $('#chips').innerHTML=['All','★ Shadrix Matrix',...ALLCATS].map(d=>`<button class="chip ${d===activeDisc?'active':''}" data-d="${esc(d)}">${esc(d)}</button>`).join('');
+    /* Eight chips instead of twenty-three, and they wrap instead of scrolling. */
+    const labels=['All','★ Shadrix Matrix',...CAT_GROUPS.map(g=>g[0])];
+    $('#chips').classList.add('wrap');
+    $('#chips').innerHTML=labels.map(d=>{
+      let n='';
+      if(d==='All') n=THEORIES.length;
+      else if(d==='★ Shadrix Matrix') n=THEORIES.filter(t=>t.dis).length;
+      else n=groupCount(d);
+      return `<button class="chip ${d===activeDisc?'active':''}" data-d="${esc(d)}">${esc(d)}<span class="n">${n}</span></button>`;
+    }).join('');
     document.querySelectorAll('#chips .chip').forEach(c=>c.addEventListener('click',()=>{activeDisc=c.dataset.d; renderChips(); renderList();}));
+    setCatNote();
   }else{
-    const bank=viewMode==='question'?TEACH:PROB;
-    $('#chips').innerHTML=bank.map((t,i)=>`<button class="chip ${i===activeQ?'active':''}" data-i="${i}">${esc(t.label)}</button>`).join('');
-    document.querySelectorAll('#chips .chip').forEach(c=>c.addEventListener('click',()=>{activeQ=+c.dataset.i; renderChips(); renderList();}));
+    /* No chip strip here (v25). These two views are made of questions, and a
+       chip truncates the question — which is the only part worth reading. The
+       list itself becomes the picker; see pickerCards() in renderList. */
+    $('#chips').classList.remove('wrap');
+    $('#chips').innerHTML='';
+    $('#catnote').innerHTML = (activeQ===null)
+      ? (viewMode==='question'
+          ? 'Pick the question closest to what you are trying to do.'
+          : 'Pick the sentence closest to what you are hearing yourself say.')
+      : '';
+  }
+}
+/* The precise taxonomy is not lost — the grouped chip names its members. */
+function setCatNote(){
+  const el=$('#catnote'); if(!el) return;
+  if(activeDisc==='All'||activeDisc==='★ Shadrix Matrix'){
+    el.innerHTML='';
+  }else{
+    el.innerHTML='<b>'+esc(activeDisc)+'</b> — '+groupCats(activeDisc).map(esc).join(' · ');
   }
 }
 function matches(t,q){
@@ -2393,12 +2470,12 @@ function matches(t,q){
   return hay.includes(q);
 }
 function renderList(){
-  $('#detail').classList.add('hidden'); $('#list').classList.remove('hidden'); $('.toolbar').classList.remove('hidden'); $('#chips').classList.remove('hidden'); $('#vtog').classList.remove('hidden');
+  $('#detail').classList.add('hidden'); $('#list').classList.remove('hidden'); $('.toolbar').classList.remove('hidden'); $('#chips').classList.remove('hidden'); $('#vtog').classList.remove('hidden'); $('#catnote').classList.remove('hidden');
   const q=$('#q').value.trim();
   const card=t=>`
     <div class="tcard" data-id="${t.id}">
       <div class="disc">${esc(t.discipline)}</div>
-      <h3>${esc(t.name)}${kindBadge(t)}${t.dis?'<span class="badge" style="background:var(--accent-soft);color:#134441;">★ matrix</span>':''}${t.depth==='starter'?'<span class="badge">starter</span>':''}</h3>
+      <h3>${esc(t.name)}${t.dis?'<span class="badge" style="background:var(--accent-soft);color:#134441;">★ matrix</span>':''}${t.depth==='starter'?'<span class="badge">starter</span>':''}</h3>
       <div class="who">${esc(t.theorists)}</div>
       <p>${esc(t.tagline)}</p>
     </div>`;
@@ -2411,16 +2488,41 @@ function renderList(){
   const stubMatch=(s)=>!q||((s[0]+' '+s[1]).toLowerCase().includes(q.toLowerCase()));
   let html='', count=0, lead='';
   if(viewMode==='question'||viewMode==='problem'){
-    const cl=(viewMode==='question'?TEACH:PROB)[activeQ];
-    const items=cl.ids.map(id=>byId(id)).filter(Boolean).filter(t=>matches(t,q));
-    count=items.length;
-    lead=`<div class="qlead"><b>${esc(cl.q)}</b><br>${esc(cl.why)}</div>`;
-    html=items.map(card).join('');
+    const bank=viewMode==='question'?TEACH:PROB;
+    if(activeQ===null){
+      /* The picker. Full questions, not truncated chips — and no sideways
+         scroll, because it is an ordinary vertical list. A search typed here
+         looks across every cluster at once rather than inside one. */
+      if(q){
+        const seen=new Set(), items=[];
+        bank.forEach(cl=>cl.ids.forEach(id=>{
+          const t=byId(id);
+          if(t&&!seen.has(t.id)&&matches(t,q)){ seen.add(t.id); items.push(t); }
+        }));
+        count=items.length;
+        lead=`<div class="qlead"><b>Searching every ${viewMode==='question'?'teaching question':'classroom problem'}</b><br>${count} ${count===1?'theory matches':'theories match'} “${esc(q)}”. Clear the search to browse by question.</div>`;
+        html=items.map(card).join('');
+      }else{
+        count=bank.length;
+        html=bank.map((cl,i)=>`
+          <div class="tcard qpick" data-i="${i}">
+            <h3>${esc(cl.q)}</h3>
+            <p>${esc(cl.why)}</p>
+            <div class="qcount">${cl.ids.length} ${cl.ids.length===1?'theory':'theories'} →</div>
+          </div>`).join('');
+      }
+    }else{
+      const cl=bank[activeQ];
+      const items=cl.ids.map(id=>byId(id)).filter(Boolean).filter(t=>matches(t,q));
+      count=items.length;
+      lead=`<div class="qlead"><button class="qback">← All ${viewMode==='question'?'teaching questions':'classroom problems'}</button><b>${esc(cl.q)}</b><br>${esc(cl.why)}</div>`;
+      html=items.map(card).join('');
+    }
   }else if(activeDisc==='★ Shadrix Matrix'){
     const items=THEORIES.filter(t=>t.dis&&matches(t,q));
     count=items.length; html=items.map(card).join('');
   }else{
-    const cats=activeDisc==='All'?ALLCATS:[activeDisc];
+    const cats=groupCats(activeDisc);
     cats.forEach(cat=>{
       const built=THEORIES.filter(t=>t.discipline===cat&&matches(t,q));
       const stubs=(STUBS[cat]||[]).map((s,si)=>[s,si]).filter(([s])=>stubMatch(s));
@@ -2429,12 +2531,18 @@ function renderList(){
     });
   }
   $('#list').innerHTML=lead+(count?html:'<div class="empty">No theories match that search.</div>');
-  document.querySelectorAll('.tcard:not(.stub2)').forEach(c=>c.addEventListener('click',()=>showDetail(c.dataset.id)));
+  document.querySelectorAll('.tcard:not(.stub2):not(.qpick)').forEach(c=>c.addEventListener('click',()=>showDetail(c.dataset.id)));
   document.querySelectorAll('.tcard.stub2').forEach(c=>c.addEventListener('click',()=>showStub(c.dataset.cat,+c.dataset.si)));
+  document.querySelectorAll('.tcard.qpick').forEach(c=>c.addEventListener('click',()=>{
+    activeQ=+c.dataset.i; renderChips(); renderList();
+    const h=$('#list h3'); if(h){ window.scrollTo(0,0); }
+  }));
+  const qb=$('#list .qback');
+  if(qb) qb.addEventListener('click',()=>{ activeQ=null; renderChips(); renderList(); window.scrollTo(0,0); });
 }
 function showStub(cat,si){
   const s=(STUBS[cat]||[])[si]; if(!s) return;
-  $('#list').classList.add('hidden'); $('.toolbar').classList.add('hidden'); $('#chips').classList.add('hidden'); $('#vtog').classList.add('hidden');
+  $('#list').classList.add('hidden'); $('.toolbar').classList.add('hidden'); $('#chips').classList.add('hidden'); $('#vtog').classList.add('hidden'); $('#catnote').classList.add('hidden');
   const d=$('#detail'); d.classList.remove('hidden');
   d.innerHTML=`<div class="detail">
     <button class="backbtn">← All theories</button>
@@ -2558,21 +2666,39 @@ function renderFramework(){
   if(btn1) btn1.addEventListener('click',()=>{ if(navigator.clipboard) navigator.clipboard.writeText(mk(true)).then(()=>{btn1.textContent='✓ Copied';btn1.classList.add('on');}).catch(()=>{}); });
   if(btn2) btn2.addEventListener('click',()=>{ if(navigator.clipboard) navigator.clipboard.writeText(mkRefs()).then(()=>{btn2.textContent='✓ Copied — '+mkRefs().split('\n\n').length+' unique references';btn2.classList.add('on');}).catch(()=>{}); });
 }
-function sec(title,inner){ return inner?`<section><h4>${title}</h4>${inner}</section>`:''; }
+/* ===== Collapsible entry sections (v25) ==========================
+   A full entry runs about nine phone screens of continuous prose across
+   fourteen sections. That is a wall, and a wall is where attention goes to
+   die. Each section is now a native <details>: on arrival you see the whole
+   map of the entry in roughly one screen with the first section already
+   open, and you open only what you came for. Native <details> keeps keyboard
+   and screen-reader behaviour for free — no ARIA to get wrong — and printing
+   force-opens everything so a printed entry is still complete. */
+let _secN=0;
+function expandAll(){ try{ return localStorage.getItem('tl_expand')==='1'; }catch(e){ return false; } }
+function setExpandAll(v){ try{ localStorage.setItem('tl_expand', v?'1':'0'); }catch(e){} }
+function sec(title,inner){
+  if(!inner) return '';
+  const open = (expandAll() || _secN===0) ? ' open' : '';
+  _secN++;
+  return `<details class="sec"${open}><summary><h4>${title}</h4></summary><div class="secbody">${inner}</div></details>`;
+}
 function list(items){ return items&&items.length?'<ul>'+items.map(i=>`<li>${esc(i)}</li>`).join('')+'</ul>':''; }
 function showDetail(id, opts){
   opts=opts||{};
   const t=byId(id); if(!t) return;
   if(!opts.fromHash) location.hash='#t/'+id;
   document.title=t.name+' — The Theory Lab';
-  $('#list').classList.add('hidden'); $('.toolbar').classList.add('hidden'); $('#chips').classList.add('hidden'); $('#vtog').classList.add('hidden');
+  $('#list').classList.add('hidden'); $('.toolbar').classList.add('hidden'); $('#chips').classList.add('hidden'); $('#vtog').classList.add('hidden'); $('#catnote').classList.add('hidden');
   const d=$('#detail'); d.classList.remove('hidden');
+  _secN=0;
   d.innerHTML=`<div class="detail">
     <button class="backbtn">← All theories</button>
     <div class="disc" style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);font-weight:700;">${esc(t.discipline)}</div>
     <h2 tabindex="-1">${esc(t.name)}</h2>
     <div class="who">${esc(t.theorists)}</div>
     <p style="font-size:.98rem;"><em>${esc(t.tagline)}</em></p>
+    <button class="expandbtn" id="expandall">${expandAll()?'Collapse sections':'Open everything'}</button>
     ${sec('What problem does this theory help explain?', t.problem?`<p style="font-size:.94rem;">${esc(t.problem)}</p>${t.asks&&t.asks.length?'<div style="margin-top:8px;"><b style="font-size:.85rem;">The questions it tries to answer:</b>'+list(t.asks)+'</div>':''}`:'')}
     ${sec('Origins & context', t.origins?`<p style="font-size:.94rem;">${esc(t.origins)}</p>`:'')}
     ${sec('Core claims', list(t.claims))}
@@ -2595,6 +2721,13 @@ function showDetail(id, opts){
   </div>`;
   /* v23: focus management + citation helpers */
   const hh=d.querySelector('h2'); if(hh) hh.focus({preventScroll:true});
+  const ea=d.querySelector('#expandall');
+  if(ea) ea.addEventListener('click',()=>{
+    const now=!expandAll();
+    setExpandAll(now);
+    d.querySelectorAll('details.sec').forEach((x,i)=>{ x.open = now || i===0; });
+    ea.textContent = now?'Collapse sections':'Open everything';
+  });
   d.querySelectorAll('[data-fw]').forEach(b=>b.addEventListener('click',()=>{
     fwSet(t.id, b.dataset.fw || null);
     showDetail(t.id,{fromHash:true});
@@ -2951,6 +3084,10 @@ function routeFromHash(){
 window.addEventListener('hashchange',()=>{ if(!routeFromHash()) goTab('library',{fromHash:true}); });
 
 /* --- init --- */
+/* Printing must never lose content to a closed section. CSS alone is not
+   reliable across browsers for <details>, so force them open first. */
+window.addEventListener('beforeprint',()=>document.querySelectorAll('details.sec').forEach(x=>{ x.dataset.wasopen=x.open?'1':'0'; x.open=true; }));
+window.addEventListener('afterprint',()=>document.querySelectorAll('details.sec').forEach(x=>{ if(x.dataset.wasopen==='0') x.open=false; delete x.dataset.wasopen; }));
 renderChips(); renderList(); fillCmp(); renderScenario();
 routeFromHash();
 </script>
